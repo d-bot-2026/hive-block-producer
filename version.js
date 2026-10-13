@@ -1,0 +1,57 @@
+/* Hive Block Producer releases, newest first.
+   The first entry is the current version shown in the game. To ship a new version, add an entry at the top,
+   then run `node scripts/changelog.js` to regenerate CHANGELOG.md.
+   Versioning: vMAJOR.MINOR.PATCH. New features bump MINOR, bug fixes bump PATCH; v1.0.0 marks the end of beta. */
+window.HBP_RELEASES = [
+  {
+    version: '0.6.0',
+    date: '2026-10-13',
+    notes: [
+      'New rare piece: the Consensus Seal, an H-shaped block from HF26 that fills and clears rows that are at least 70% full.',
+      'Original 8-bit background music that speeds up with each hardfork, with its own on/off switch (N key) separate from sound effects (M key).',
+      'Version number and this changelog in the home page footer.',
+    ],
+  },
+  {
+    version: '0.5.0',
+    date: '2026-10-10',
+    notes: [
+      'Moved to its own repository and a new address: d-bot-2026.github.io/hive-block-producer.',
+      'Search engine verification and updated share links for the new address.',
+    ],
+  },
+  {
+    version: '0.4.0',
+    date: '2026-10-09',
+    notes: [
+      'Public launch: search engines may index the site, with share previews for LINE, Threads and Hive.',
+      'New-player warm-up (slower pieces until the first clear) and a 10-second controls hint.',
+      'Unofficial fan project notice.',
+    ],
+  },
+  {
+    version: '0.3.0',
+    date: '2026-10-08',
+    notes: [
+      'Renamed to Hive Block Producer, with a home page, guest nickname and top-10 records on this device.',
+      'Eight languages, English by default, and a notice that in-game HIVE, HBD and RC have no real value.',
+      'Cookie-free visit counting with GoatCounter.',
+    ],
+  },
+  {
+    version: '0.2.0',
+    date: '2026-10-07',
+    notes: [
+      'Phone controls split into a square move pad and round rotate keys to avoid mis-taps.',
+      'Chinese and English interface.',
+    ],
+  },
+  {
+    version: '0.1.0',
+    date: '2026-10-07',
+    notes: [
+      'First playable build: a Hive-themed block puzzle with HIVE and HBD tokens, Resource Credits, worker bees and flag bombs.',
+      'Hardfork eras every 10 lines and random chain events such as whale upvotes, downvotes and airdrops.',
+    ],
+  },
+];

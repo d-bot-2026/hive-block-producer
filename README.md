@@ -9,3 +9,7 @@ A free browser block puzzle game with a Hive blockchain theme. Stack transaction
 - Unofficial fan project, not affiliated with Hive.
 
 Feedback and bug reports: [Issues](https://github.com/d-bot-2026/hive-block-producer/issues).
+
+## Versions
+
+The current version and release notes live in `version.js` (shown in the game footer). After adding a release there, run `node scripts/changelog.js` to regenerate [CHANGELOG.md](CHANGELOG.md).

@@ -232,7 +232,7 @@ kbd {
 .feed li.fork .tag { color: var(--honey); }
 .feed .empty { color: var(--muted); }
 
-.mini-actions { display: flex; gap: 8px; }
+.mini-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .ghost-btn {
   flex: 1; background: transparent; border: 1px solid var(--line); color: var(--muted);
   border-radius: 8px; padding: 7px 8px; cursor: pointer; font-size: 12px;
@@ -402,6 +402,22 @@ kbd {
 @media (prefers-reduced-motion: reduce) { .t-move.hint .t-key, .t-rot.hint .t-round { animation: none; box-shadow: 0 0 0 3px rgba(245, 165, 36, 0.6); } }
 .home-foot { display: flex; flex-wrap: wrap; gap: 6px 10px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
 .home-foot a { color: var(--honey); }
+.ver-btn { margin-left: auto; background: none; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); font: 600 11.5px var(--f-mono); padding: 4px 10px; cursor: pointer; }
+.ver-btn:hover, .ver-btn[aria-expanded="true"] { color: var(--fg); border-color: var(--muted); }
+.changelog { flex-basis: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; font-family: "Noto Sans", system-ui, sans-serif; letter-spacing: 0; }
+.changelog h3 { margin: 0 0 10px; font: 700 12px var(--f-display); letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; }
+.changelog section + section { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.changelog h4 { margin: 0 0 4px; font: 700 13px var(--f-mono); color: var(--fg); }
+.changelog h4 span { color: var(--muted); font-weight: 500; margin-left: 6px; }
+.changelog ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 12.5px; line-height: 1.5; }
+.ver-note { margin: 14px 0 0; font: 500 11px var(--f-mono); color: var(--muted); }
+.t-pill.off { opacity: 0.45; text-decoration: line-through; }
+@media (max-width: 420px) {
+  .t-util { flex-wrap: wrap; justify-content: center; }
+  .t-util .t-gap { display: none; }
+  .t-pill { padding: 0 9px; font-size: 12px; height: 36px; }
+  .t-pill small { display: none; }
+}
 .disclaimer { margin: 0; max-width: 60ch; font-size: 12px; line-height: 1.5; color: var(--muted); background: var(--bg-deep); border: 1px dashed var(--line); border-radius: 8px; padding: 8px 12px; }
 .note { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
 .home-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; align-items: start; }
@@ -501,7 +517,7 @@ kbd {
       <section class="box"><h2 data-i18n="records">紀錄</h2><div class="records-wrap" id="records"></div></section>
     </div>
   </div>
-  <footer class="home-foot"><span data-i18n="beta"></span> <a href="https://github.com/d-bot-2026/hive-block-producer/issues/new" target="_blank" rel="noopener" data-i18n="feedback"></a><span id="privacyNote" data-i18n="privacy" hidden></span></footer>
+  <footer class="home-foot"><span data-i18n="beta"></span> <a href="https://github.com/d-bot-2026/hive-block-producer/issues/new" target="_blank" rel="noopener" data-i18n="feedback"></a><span id="privacyNote" data-i18n="privacy" hidden></span><button type="button" class="ver-btn" id="verBtn" aria-expanded="false" aria-controls="changelog"></button><div class="changelog" id="changelog" lang="en" hidden></div></footer>
 </section>
 
 <div class="app" id="app" hidden>
@@ -528,7 +544,8 @@ kbd {
         <li><span data-i18n="kDrop">軟降 / 硬降</span><span><kbd>↓</kbd><kbd data-i18n="space">空白</kbd></span></li>
         <li><span data-i18n="hold">保留</span><span><kbd>C</kbd></span></li>
         <li><span data-i18n="summonBee">召喚工蜂</span><span><kbd>B</kbd></span></li>
-        <li><span data-i18n="kPauseMute">暫停 / 靜音</span><span><kbd>P</kbd><kbd>M</kbd></span></li>
+        <li><span data-i18n="kPauseMute">暫停 / 音效</span><span><kbd>P</kbd><kbd>M</kbd></span></li>
+        <li><span data-i18n="kMusic">音樂</span><span><kbd>N</kbd></span></li>
         <li><span data-i18n="kLang">切換語言</span><span><kbd>L</kbd></span></li>
       </ul>
     </section>
@@ -566,6 +583,7 @@ kbd {
     <div class="mini-actions m-hide">
       <button class="ghost-btn" id="pauseBtn" type="button"></button>
       <button class="ghost-btn" id="muteBtn" type="button"></button>
+      <button class="ghost-btn" id="musicBtn" type="button"></button>
       <button class="ghost-btn" id="langBtn" type="button"></button>
     </div>
   </aside>
@@ -577,6 +595,7 @@ kbd {
       <span class="t-gap"></span>
       <button type="button" data-act="pause" class="t-pill" data-i18n="pause">暫停</button>
       <button type="button" data-act="mute" class="t-pill" id="muteBtn2"></button>
+      <button type="button" data-act="music" class="t-pill" id="musicBtn2"></button>
       <button type="button" data-act="lang" class="t-pill" id="langBtn2"></button>
     </div>
     <div class="t-pads">
@@ -602,6 +621,7 @@ kbd {
 
 <div class="overlay" id="overlay"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 
+<script src="version.js"></script>
 <script src="i18n.js"></script>
 <script>
 (() => {
@@ -623,6 +643,7 @@ const PIECES = {
   L: { color: '#f5a524', m: [[0,0,1],[1,1,1],[0,0,0]] },
   B: { color: '#ffc93c', m: [[1]], special: 'bee' },
   F: { color: '#5b4750', m: [[1]], special: 'flag' },
+  H: { color: '#d6cfee', m: [[1,0,1],[1,1,1],[1,0,1]], special: 'seal' },
 };
 const GARBAGE = '#4a3942';
 const colorOf = t => (PIECES[t] ? PIECES[t].color : GARBAGE);
@@ -718,10 +739,104 @@ const SFX = {
   err:    [[100, 0.14, 0, 'square', 0.04]],
   over:   [[392, 0.2, 0, 'triangle', 0.07], [330, 0.2, 0.2, 'triangle', 0.07], [262, 0.2, 0.4, 'triangle', 0.07], [196, 0.5, 0.6, 'triangle', 0.07]],
   coin:   [[1319, 0.06, 0, 'square', 0.03], [1760, 0.12, 0.05, 'square', 0.03]],
+  seal:   [[523, 0.12, 0, 'triangle', 0.07], [659, 0.12, 0.08, 'triangle', 0.07], [784, 0.12, 0.16, 'triangle', 0.07], [1047, 0.34, 0.24, 'square', 0.04], [1568, 0.3, 0.32, 'triangle', 0.04]],
 };
 function sfx(name) {
   if (muted || !actx) return;
   try { SFX[name].forEach(([f, d, dl, ty, v]) => tone(f, d, dl, ty, v)); } catch (e) { /* ignore audio errors */ }
+}
+/* ---------- background music: an original 8-bit loop, synthesized live (no audio files) ----------
+   16 bars of eighth notes in C major. Melody tokens: a note name starts a note, '-' holds it, '.' is a rest. */
+const MUSIC_KEY = 'hive-tetris-music';
+let musicOn = store.get(MUSIC_KEY) !== '0';
+const MUSIC_BASE_BPM = 112, MUSIC_BPM_STEP = 5, MUSIC_MAX_BPM = 150, MUSIC_VOL = 0.3;
+const SONG = [
+  ['C', 'G4 . C5 . E5 G5 - E5'], ['Am', 'A5 - G5 E5 - C5 D5 .'], ['F', 'F5 . A5 . F5 E5 - C5'], ['G', 'D5 - - G4 B4 D5 G5 .'],
+  ['C', 'G4 . C5 . E5 G5 - C6'], ['Am', 'B5 - A5 E5 - A5 G5 .'], ['F', 'F5 A5 C6 - A5 F5 G5 A5'], ['G', 'G5 - - - D5 . G4 .'],
+  ['Dm', 'F5 . D5 F5 A5 . F5 .'], ['Em', 'G5 . E5 G5 B5 . G5 .'], ['F', 'A5 G5 F5 E5 F5 - C5 .'], ['G', 'D5 E5 F5 G5 - - . .'],
+  ['Am', 'E5 . A5 . E5 C5 E5 A5'], ['F', 'F5 . C6 . A5 F5 A5 C6'], ['G', 'B5 A5 G5 F5 E5 D5 B4 D5'], ['C', 'C5 - G4 - C5 - . .'],
+];
+const ROOTS = { C: 'C3', Am: 'A2', F: 'F2', G: 'G2', Dm: 'D3', Em: 'E3' };
+function noteFreq(n) {
+  const m = /^([A-G])(#?)(\d)$/.exec(n);
+  const midi = 12 * (Number(m[3]) + 1) + { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] ? 1 : 0);
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+const SONG_STEPS = SONG.flatMap(([ch, mel]) => mel.split(' ').map(tk => ({ ch, tk })));
+const LEAD = SONG_STEPS.map((st, i) => {
+  if (st.tk === '-' || st.tk === '.') return null;
+  let len = 1;
+  while (SONG_STEPS[(i + len) % SONG_STEPS.length].tk === '-') len++;
+  return { f: noteFreq(st.tk), len };
+});
+const music = { timer: 0, step: 0, next: 0, gain: null, pulse: null, noise: null, playing: false };
+const musicBpm = () => Math.min(MUSIC_MAX_BPM, MUSIC_BASE_BPM + Math.max(0, S.hf - 24) * MUSIC_BPM_STEP);
+function musicSetup() {
+  if (music.gain) return;
+  music.gain = actx.createGain(); music.gain.gain.value = 0; music.gain.connect(actx.destination);
+  const n = 32, re = new Float32Array(n), im = new Float32Array(n);
+  for (let k = 1; k < n; k++) re[k] = 2 / (k * Math.PI) * Math.sin(Math.PI * k * 0.25); // 25% pulse wave
+  music.pulse = actx.createPeriodicWave(re, im);
+  const buf = actx.createBuffer(1, Math.floor(actx.sampleRate * 0.5), actx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  music.noise = buf;
+}
+function mVoice(type, f, t0, dur, vol, slideTo) {
+  const o = actx.createOscillator(), g = actx.createGain();
+  if (type === 'pulse') o.setPeriodicWave(music.pulse); else o.type = type;
+  o.frequency.setValueAtTime(f, t0);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(vol, t0 + 0.005);
+  g.gain.setValueAtTime(vol, t0 + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g).connect(music.gain); o.start(t0); o.stop(t0 + dur + 0.02);
+}
+function mNoise(t0, dur, vol, cut) {
+  const src = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain();
+  src.buffer = music.noise; f.type = 'highpass'; f.frequency.value = cut;
+  g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(f).connect(g).connect(music.gain); src.start(t0); src.stop(t0 + dur + 0.02);
+}
+function scheduleStep(i, t0, sd) {
+  const st = SONG_STEPS[i], lead = LEAD[i], beat = i % 8, root = noteFreq(ROOTS[st.ch]);
+  if (lead) mVoice('pulse', lead.f, t0, lead.len * sd * 0.92, 0.05);
+  mVoice('triangle', beat % 2 ? root * 2 : root, t0, sd * 0.85, 0.09);
+  if (beat === 0 || beat === 4) mVoice('triangle', 150, t0, 0.12, 0.12, 45);
+  if (beat === 2 || beat === 6) mNoise(t0, 0.09, 0.05, 1800);
+  if (beat % 2 === 1) mNoise(t0, 0.03, 0.025, 7000);
+}
+function musicTick() {
+  const sd = 60 / musicBpm() / 2;
+  while (music.next < actx.currentTime + 0.12) {
+    scheduleStep(music.step, music.next, sd);
+    music.next += sd;
+    music.step = (music.step + 1) % SONG_STEPS.length;
+  }
+}
+function musicStart() {
+  if (music.playing || !actx) return;
+  try {
+    musicSetup();
+    if (actx.state === 'suspended') actx.resume();
+    music.playing = true;
+    music.next = actx.currentTime + 0.06;
+    const g = music.gain.gain, now = actx.currentTime;
+    g.cancelScheduledValues(now); g.setValueAtTime(g.value, now); g.linearRampToValueAtTime(MUSIC_VOL, now + 0.4);
+    clearInterval(music.timer); music.timer = setInterval(musicTick, 25); musicTick();
+  } catch (e) { music.playing = false; }
+}
+function musicStop() {
+  if (!music.playing) return;
+  music.playing = false;
+  clearInterval(music.timer); music.timer = 0;
+  try { const g = music.gain.gain, now = actx.currentTime; g.cancelScheduledValues(now); g.setValueAtTime(g.value, now); g.linearRampToValueAtTime(0, now + 0.35); } catch (e) { /* ignore */ }
+}
+// music plays only while a game is actually running and the tab is visible
+function musicSync() { if (musicOn && S && S.state === 'play' && !document.hidden && actx) musicStart(); else musicStop(); }
+function toggleMusic() {
+  musicOn = !musicOn; store.set(MUSIC_KEY, musicOn ? '1' : '0');
+  if (musicOn) initAudio();
+  updateButtons(); musicSync();
 }
 function toggleMute() {
   muted = !muted; store.set('hive-tetris-muted', muted ? '1' : '0');
@@ -759,10 +874,14 @@ function makeQ(type) {
   }
   return { type, base: m };
 }
+// Consensus Seal: rare H piece; rows it touches that are at least SEAL_FILL full get filled and cleared
+const SEAL_MIN_HF = 26, SEAL_CHANCE = 0.02, SEAL_FILL = 0.7, SEAL_BONUS = 150;
+const SEAL_MIN = Math.ceil(COLS * SEAL_FILL);
 function genPiece() {
   S.pieceCount++;
   if (S.era.id === 'bee' && S.pieceCount % 7 === 0) return makeQ('B');
   if (S.hf >= 25 && Math.random() < 0.035) return makeQ('F');
+  if (S.hf >= SEAL_MIN_HF && !S.warm && Math.random() < SEAL_CHANCE) return makeQ('H');
   if (!S.bag.length) S.bag = shuffle(['I', 'O', 'T', 'S', 'Z', 'J', 'L']);
   return makeQ(S.bag.pop());
 }
@@ -928,7 +1047,7 @@ function lockPiece() {
       S.board[y][x] = { t: p.type, k: v === 2 ? 'coin' : v === 3 ? 'hbd' : null };
     }
     if (out) { gameOver(); return; }
-    sfx('lock');
+    if (p.special === 'seal') applySeal(p); else sfx('lock');
   }
   S.canHold = true;
   S.placed++;
@@ -936,6 +1055,28 @@ function lockPiece() {
   checkLines(true);
 }
 
+function sealRows(p) {
+  const rows = [...new Set(cellsOf(p).map(c => c[1]))].filter(y => y >= 0 && y < ROWS);
+  return rows.filter(y => {
+    const pieceHere = cellsOf(p).filter(c => c[1] === y && !S.board[y][c[0]]).length;
+    return S.board[y].filter(Boolean).length + pieceHere >= SEAL_MIN;
+  });
+}
+function applySeal(p) {
+  const sealed = sealRows(p); // the piece is already on the board here
+  if (!sealed.length) { floatText(t('sealNone'), p.x + 1.5, p.y + 1, PIECES.H.color); sfx('lock'); return; }
+  for (const y of sealed) for (let x = 0; x < COLS; x++) {
+    if (!S.board[y][x]) S.board[y][x] = { t: 'H', k: null };
+    burst(x + 0.5, y + 0.5, x % 2 ? '#f5a524' : '#efe9ff', 3, 5);
+  }
+  const g = SEAL_BONUS * sealed.length * mult();
+  addHive(g);
+  floatText(t('rule.seal.t'), COLS / 2, sealed[0] - 1.2, '#efe9ff');
+  banner(t('rule.seal.t'), t('sealD', { n: sealed.length, g: fmt3(g) }), 'fork');
+  log('sealLog', { n: sealed.length }, 'good');
+  if (!REDUCED) S.shake = 200;
+  sfx('seal');
+}
 function checkLines(fromLock) {
   if (S.clearing || S.state !== 'play') return;
   const rows = [];
@@ -1098,6 +1239,7 @@ const held = { h: null, down: false };
 function inputDown(a) {
   if (langOpen) return;
   if (a === 'mute') { toggleMute(); return; }
+  if (a === 'music') { toggleMusic(); return; }
   if (a === 'lang') { openLangMenu(); return; }
   if (a === 'pause') { togglePause(); return; }
   if (S.state !== 'play') return;
@@ -1124,7 +1266,7 @@ function inputUp(a) {
 }
 const KEYMAP = {
   ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'down', ArrowUp: 'rotate', KeyX: 'rotate', KeyZ: 'rotateL',
-  Space: 'drop', KeyC: 'hold', ShiftLeft: 'hold', ShiftRight: 'hold', KeyB: 'bee', KeyP: 'pause', Escape: 'pause', KeyM: 'mute', KeyL: 'lang',
+  Space: 'drop', KeyC: 'hold', ShiftLeft: 'hold', ShiftRight: 'hold', KeyB: 'bee', KeyP: 'pause', Escape: 'pause', KeyM: 'mute', KeyN: 'music', KeyL: 'lang',
 };
 addEventListener('keydown', e => {
   if (e.target && e.target.matches && e.target.matches('input, textarea, select')) return;
@@ -1151,13 +1293,20 @@ boardCv.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse' && 
 el.beeBtn.addEventListener('click', () => summonBee());
 el.pauseBtn.addEventListener('click', () => togglePause());
 el.muteBtn.addEventListener('click', () => toggleMute());
+$('#musicBtn').addEventListener('click', () => toggleMusic());
 $('#langBtn').addEventListener('click', () => openLangMenu());
 $('#langBtnHome').addEventListener('click', () => openLangMenu());
 let bodyFont = 'sans-serif';
 const curLang = () => LANGS.find(l => l.code === lang);
 function updateButtons() {
   el.muteBtn.textContent = t(muted ? 'soundOff' : 'soundOn');
-  $('#muteBtn2').textContent = t(muted ? 'soundOffShort' : 'soundOnShort');
+  $('#musicBtn').textContent = t(musicOn ? 'musicOn' : 'musicOff');
+  $('#muteBtn2').textContent = t('soundShort');
+  $('#musicBtn2').textContent = t('musicShort');
+  $('#muteBtn2').classList.toggle('off', muted); $('#muteBtn2').setAttribute('aria-pressed', String(!muted));
+  $('#musicBtn2').classList.toggle('off', !musicOn); $('#musicBtn2').setAttribute('aria-pressed', String(musicOn));
+  ['#muteBtn', '#muteBtn2'].forEach(q => $(q).title = t('soundTip'));
+  ['#musicBtn', '#musicBtn2'].forEach(q => $(q).title = t('musicTip'));
   el.pauseBtn.textContent = t(S && S.state === 'pause' ? 'resume' : 'pause');
   $('#langBtn').innerHTML = GLOBE + ' ' + escapeHtml(curLang().name);
   $('#langBtnHome').innerHTML = GLOBE + '<span>' + escapeHtml(curLang().name) + '</span>';
@@ -1204,7 +1353,7 @@ function closeLangMenu() {
   if (langReturn) showSheet(langReturn); else { el.overlay.hidden = true; sheetFn = null; }
   langReturn = null;
 }
-document.addEventListener('visibilitychange', () => { if (document.hidden && S.state === 'play') togglePause(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && S.state === 'play') togglePause(); musicSync(); });
 function handleHeld(dt) {
   if (!held.h) return;
   held.h.t += dt;
@@ -1251,6 +1400,7 @@ function startGame() {
   layout();
   updateButtons();
   sfx('fork');
+  musicSync();
 }
 function showHome() {
   endCoach();
@@ -1261,6 +1411,7 @@ function showHome() {
   $('#playerName').value = playerName;
   renderHome();
   updateButtons();
+  musicSync();
   window.scrollTo(0, 0);
 }
 function langMenuBtn() { return `<button class="secondary" data-act="langmenu" type="button" style="display:inline-flex;align-items:center;gap:6px">${GLOBE}${escapeHtml(curLang().name)}</button>`; }
@@ -1272,15 +1423,18 @@ function togglePause() {
       <p class="lead">${t('pauseD', { h: S.height.toLocaleString('en-US') })}</p>
       <div class="actions"><button class="primary" data-act="resume" type="button">${t('resumeBtn')}</button>
       <button class="secondary" data-act="start" type="button">${t('restartBtn')}</button>
-      <button class="secondary" data-act="home" type="button">${t('homeBtn')}</button>${langMenuBtn()}</div>`);
+      <button class="secondary" data-act="home" type="button">${t('homeBtn')}</button>${langMenuBtn()}</div>
+      <p class="ver-note">Hive Block Producer v${VERSION.version}</p>`);
   } else if (S.state === 'pause') {
     S.state = 'play'; el.overlay.hidden = true; sheetFn = null;
   }
   updateButtons();
+  musicSync();
 }
 function gameOver() {
   if (S.state === 'over') return;
   S.state = 'over'; S.cur = null;
+  musicSync();
   sfx('over');
   endCoach();
   track('game-over', `Game over: ${S.lines} lines, ${S.placed} pieces, ${Math.round(S.t / 1000)}s, HF${S.hfMax}`);
@@ -1307,7 +1461,8 @@ function gameOver() {
     <p class="disclaimer" style="margin-bottom:14px">${t('disclaimer')}</p>
     ${record ? `<p class="record">${t('record')}</p>` : `<p class="best">${t('best')} <b>${fmt3(best)}</b></p><p></p>`}
     <div class="actions"><button class="primary" data-act="start" type="button">${t('againBtn')}</button>
-    <button class="secondary" data-act="home" type="button">${t('homeBtn')}</button>${langMenuBtn()}</div>`); }, 700);
+    <button class="secondary" data-act="home" type="button">${t('homeBtn')}</button>${langMenuBtn()}</div>
+    <p class="ver-note">Hive Block Producer v${VERSION.version}</p>`); }, 700);
 }
 function showSheet(fn, cls = '') {
   sheetFn = fn;
@@ -1337,7 +1492,7 @@ $('#startForm').addEventListener('submit', e => {
   store.set(NAME_KEY, playerName);
   startGame();
 });
-const RULES = [['coin', 'canvas'], ['hbd', 'canvas'], ['bee', 'canvas'], ['flag', 'canvas'], ['rc', 'rc'], ['fork', 'fork'], ['event', 'garbage'], ['combo', 'combo']];
+const RULES = [['coin', 'canvas'], ['hbd', 'canvas'], ['bee', 'canvas'], ['flag', 'canvas'], ['seal', 'canvas'], ['rc', 'rc'], ['fork', 'fork'], ['event', 'garbage'], ['combo', 'combo']];
 function renderHome() {
   if (!$('#homeRules')) return;
   $('#homeRules').innerHTML = RULES.map(([k, ic]) => {
@@ -1347,7 +1502,7 @@ function renderHome() {
   $('#homeKeys').innerHTML = `
     <span><kbd>←</kbd><kbd>→</kbd> ${t('kmMove')}</span><span><kbd>↑</kbd><kbd>X</kbd> ${t('kmRot')}</span><span><kbd>Z</kbd> ${t('kmRotL')}</span>
     <span><kbd>↓</kbd> ${t('kmSoft')}</span><span><kbd>${t('space')}</kbd> ${t('kmHard')}</span><span><kbd>C</kbd> ${t('kmHold')}</span>
-    <span><kbd>B</kbd> ${t('kmBee')}</span><span><kbd>P</kbd> ${t('kmPause')}</span><span><kbd>L</kbd> ${t('kLang')}</span>`;
+    <span><kbd>B</kbd> ${t('kmBee')}</span><span><kbd>P</kbd> ${t('kmPause')}</span><span><kbd>N</kbd> ${t('kMusic')}</span><span><kbd>L</kbd> ${t('kLang')}</span>`;
   const runs = loadRuns();
   if (!runs.length) $('#records').innerHTML = `<p class="note">${t('noRecords')}</p>`;
   else {
@@ -1502,6 +1657,10 @@ function drawCell(c, px, py, s, t, k, alpha = 1) {
     c.beginPath(); c.moveTo(px + s * 0.32, py + s * 0.2); c.lineTo(px + s * 0.32, py + s * 0.82); c.stroke();
     c.fillStyle = '#ff5d73';
     c.beginPath(); c.moveTo(px + s * 0.34, py + s * 0.2); c.lineTo(px + s * 0.78, py + s * 0.34); c.lineTo(px + s * 0.34, py + s * 0.5); c.closePath(); c.fill();
+  } else if (t === 'H') {
+    c.strokeStyle = 'rgba(46,26,72,0.72)'; c.lineWidth = Math.max(1.5, s * 0.09); c.lineCap = 'round';
+    const a = px + s * 0.35, b = px + s * 0.65, y1 = py + s * 0.3, y2 = py + s * 0.7, ym = py + s * 0.5;
+    c.beginPath(); c.moveTo(a, y1); c.lineTo(a, y2); c.moveTo(b, y1); c.lineTo(b, y2); c.moveTo(a, ym); c.lineTo(b, ym); c.stroke();
   } else if (t === 'G') {
     c.strokeStyle = 'rgba(255,255,255,0.08)'; c.lineWidth = Math.max(1, s * 0.06);
     for (let i = -1; i < 3; i++) { c.beginPath(); c.moveTo(px + i * s * 0.4, py + s); c.lineTo(px + i * s * 0.4 + s, py); c.stroke(); }
@@ -1575,6 +1734,11 @@ function render() {
         c.save(); c.strokeStyle = 'rgba(255,93,115,0.55)'; c.setLineDash([4, 4]); c.lineWidth = 2;
         c.strokeRect((p.x - 1) * cs + 2, (gy - 1) * cs + 2, cs * 3 - 4, cs * 3 - 4); c.restore();
       }
+      if (p.special === 'seal') {
+        c.save(); c.fillStyle = 'rgba(245,165,36,0.13)'; c.strokeStyle = 'rgba(245,165,36,0.65)'; c.setLineDash([4, 4]); c.lineWidth = 1.5;
+        for (const y of sealRows({ ...p, y: gy })) { c.fillRect(0, y * cs, W, cs); c.strokeRect(1, y * cs + 1, W - 2, cs - 2); }
+        c.restore();
+      }
       if (gy !== p.y) for (const [x, y] of cellsOf({ ...p, y: gy })) if (y >= 0) drawOutline(c, x * cs, y * cs, cs, p.special === 'flag' ? '#ff5d73' : color);
     }
     for (const [x, y, v] of cellsOf(p)) if (y >= 0) drawCell(c, x * cs, y * cs, cs, p.type, v === 2 ? 'coin' : v === 3 ? 'hbd' : null);
@@ -1646,6 +1810,7 @@ function paintIconsIn(root) {
     else if (k === 'hbd') drawCell(c, 1, 1, 24, 'O', 'hbd');
     else if (k === 'bee') drawCell(c, 1, 1, 24, 'B', null);
     else if (k === 'flag') drawCell(c, 1, 1, 24, 'F', null);
+    else if (k === 'seal') drawCell(c, 1, 1, 24, 'H', null);
     else if (k === 'garbage') drawCell(c, 1, 1, 24, 'G', null);
     else if (k === 'combo') { drawCell(c, 0, 13, 13, 'S', null); drawCell(c, 13, 13, 13, 'T', null); drawCell(c, 13, 0, 13, 'L', null); }
   });
@@ -1714,6 +1879,48 @@ function frame(now) {
 
 S = freshState();
 S.board = demoBoard();
+/* ---------- version + changelog (English only; data lives in version.js) ---------- */
+const RELEASES = window.HBP_RELEASES || [{ version: '0.0.0', date: '', notes: [] }];
+const VERSION = RELEASES[0];
+function renderVersion() {
+  $('#verBtn').textContent = `v${VERSION.version} · ${VERSION.date}`;
+  $('#changelog').innerHTML = '<h3>Changelog</h3>' + RELEASES.map(r =>
+    `<section><h4>v${escapeHtml(r.version)}<span>${escapeHtml(r.date)}</span></h4><ul>${r.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')}</ul></section>`).join('');
+}
+$('#verBtn').addEventListener('click', () => {
+  const box = $('#changelog'), open = box.hidden;
+  box.hidden = !open; $('#verBtn').setAttribute('aria-expanded', String(open));
+});
+renderVersion();
+// test hooks, only when the file is opened locally (never on the public site)
+if (location.protocol === 'file:') {
+  window.__hbpTest = {
+    state: () => S, next: type => { S.queue.unshift(makeQ(type)); }, setHF: n => { S.hf = n; S.hfMax = Math.max(S.hfMax, n); },
+    endWarm: () => { S.warm = false; }, gen: () => genPiece().type, music: () => ({ on: musicOn, playing: music.playing, bpm: musicBpm() }),
+    // renders one loop of the background music offline and returns it as a WAV data URL (for listening checks)
+    renderMusic: async (hf = 24, rate = 22050) => {
+      const saved = actx, savedMusic = { ...music }, savedHf = S.hf;
+      S.hf = hf;
+      const sd = 60 / musicBpm() / 2, len = sd * SONG_STEPS.length;
+      actx = new OfflineAudioContext(1, Math.ceil((len + 0.5) * rate), rate);
+      music.gain = null; musicSetup(); music.gain.gain.value = MUSIC_VOL;
+      SONG_STEPS.forEach((_, i) => scheduleStep(i, i * sd, sd));
+      const buf = await actx.startRendering();
+      actx = saved; Object.assign(music, savedMusic); S.hf = savedHf;
+      const d = buf.getChannelData(0), out = new DataView(new ArrayBuffer(44 + d.length * 2));
+      const w = (o, str) => [...str].forEach((ch, i) => out.setUint8(o + i, ch.charCodeAt(0)));
+      w(0, 'RIFF'); out.setUint32(4, 36 + d.length * 2, true); w(8, 'WAVE'); w(12, 'fmt '); out.setUint32(16, 16, true);
+      out.setUint16(20, 1, true); out.setUint16(22, 1, true); out.setUint32(24, rate, true); out.setUint32(28, rate * 2, true);
+      out.setUint16(32, 2, true); out.setUint16(34, 16, true); w(36, 'data'); out.setUint32(40, d.length * 2, true);
+      let peak = 0;
+      for (let i = 0; i < d.length; i++) { const v = Math.max(-1, Math.min(1, d[i])); peak = Math.max(peak, Math.abs(v)); out.setInt16(44 + i * 2, v * 32767, true); }
+      let bin = ''; const u8 = new Uint8Array(out.buffer);
+      for (let i = 0; i < u8.length; i += 32768) bin += String.fromCharCode.apply(null, u8.subarray(i, i + 32768));
+      return { seconds: len, peak, wav: btoa(bin) };
+    },
+    fillRow: (y, filled) => { S.board[y] = Array.from({ length: COLS }, (_, x) => (filled.includes(x) ? { t: 'G', k: null } : null)); },
+  };
+}
 initAnalytics();
 applyStatic();
 layout();
