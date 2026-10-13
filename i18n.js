@@ -15,6 +15,14 @@ window.HT_LANGS = [
 window.HT_I18N = {
   /* ------------------------------------------------------------------ English */
   en: {
+    padAim: 'MOVE · ROTATE',
+    padDrop: 'DROP',
+    tabPlay: 'Play',
+    tabRules: 'Rules',
+    tabControls: 'Controls',
+    tabRecords: 'Records',
+    infoT: 'Version & updates',
+    moreHint: 'Swipe sideways for more →',
     'rule.seal.t': 'Consensus Seal',
     'rule.seal.d': 'A rare H-shaped piece from HF26 on. Any row it touches that is 70% full gets filled and cleared, with a consensus bonus.',
     sealD: 'Rows sealed: {n} · bonus +{g} HIVE',
@@ -41,7 +49,7 @@ window.HT_I18N = {
     kPauseMute: 'Pause / SFX', kLang: 'Language', protocol: 'Protocol', block: 'Block', next: 'Next transactions',
     rc: 'Resource Credits', feed: 'Chain activity', bee: 'Bee', pause: 'Pause', resume: 'Resume',
     soundOn: 'Sound: on', soundOff: 'Sound: off',
-    padMove: 'MOVE', padRotate: 'ROTATE', hardDrop: 'Drop', softDrop: 'Soft', left: 'Left', right: 'Right', rotL: 'Rotate L', rotR: 'Rotate R',
+    hardDrop: 'Drop', softDrop: 'Soft', left: 'Left', right: 'Right', rotL: 'Rotate L', rotR: 'Rotate R',
     holdAria: 'Held piece', boardAria: 'Game board', nextAria: 'Upcoming pieces', empty: 'Empty',
     interest: 'Interest in {n} blocks', interestX2: 'Interest in {n} blocks, rate doubled', rcRate: '+{n}/s', freeze: 'Gravity paused {s}s',
     feedWaiting: 'Chain events will show up here once you start.', feedQuiet: 'All quiet on the chain.',
@@ -97,6 +105,14 @@ window.HT_I18N = {
 
   /* ------------------------------------------------------------------ Español */
   es: {
+    padAim: 'MOVER · GIRAR',
+    padDrop: 'SOLTAR',
+    tabPlay: 'Jugar',
+    tabRules: 'Reglas',
+    tabControls: 'Controles',
+    tabRecords: 'Récords',
+    infoT: 'Versión y novedades',
+    moreHint: 'Desliza de lado para ver más →',
     'rule.seal.t': 'Sello de consenso',
     'rule.seal.d': 'Pieza rara en forma de H desde HF26. Cada fila que toque y esté llena al 70 % se completa y se limpia, con bono de consenso.',
     sealD: 'Filas selladas: {n} · bono +{g} HIVE',
@@ -123,7 +139,7 @@ window.HT_I18N = {
     kPauseMute: 'Pausa / efectos', kLang: 'Idioma', protocol: 'Protocolo', block: 'Bloque', next: 'Próximas transacciones',
     rc: 'Créditos de recursos', feed: 'Actividad en cadena', bee: 'Abeja', pause: 'Pausa', resume: 'Seguir',
     soundOn: 'Sonido: sí', soundOff: 'Sonido: no',
-    padMove: 'MOVER', padRotate: 'GIRAR', hardDrop: 'Soltar', softDrop: 'Bajar', left: 'Izq.', right: 'Der.', rotL: 'Girar ⟲', rotR: 'Girar ⟳',
+    hardDrop: 'Soltar', softDrop: 'Bajar', left: 'Izq.', right: 'Der.', rotL: 'Girar ⟲', rotR: 'Girar ⟳',
     holdAria: 'Pieza guardada', boardAria: 'Tablero de juego', nextAria: 'Próximas piezas', empty: 'Vacío',
     interest: 'Intereses en {n} bloques', interestX2: 'Intereses en {n} bloques, tasa doble', rcRate: '+{n}/s', freeze: 'Gravedad en pausa {s} s',
     feedWaiting: 'Los eventos de la cadena aparecerán aquí cuando empieces.', feedQuiet: 'Todo tranquilo en la cadena.',
@@ -179,6 +195,14 @@ window.HT_I18N = {
 
   /* ------------------------------------------------------------------ Français */
   fr: {
+    padAim: 'DÉPLACER · TOURNER',
+    padDrop: 'LÂCHER',
+    tabPlay: 'Jouer',
+    tabRules: 'Règles',
+    tabControls: 'Commandes',
+    tabRecords: 'Records',
+    infoT: 'Version et nouveautés',
+    moreHint: 'Glisse sur le côté pour la suite →',
     'rule.seal.t': 'Sceau du consensus',
     'rule.seal.d': 'Pièce rare en forme de H dès HF26. Chaque ligne touchée remplie à 70 % est complétée et effacée, avec un bonus de consensus.',
     sealD: 'Lignes scellées : {n} · bonus +{g} HIVE',
@@ -205,7 +229,7 @@ window.HT_I18N = {
     kPauseMute: 'Pause / sons', kLang: 'Langue', protocol: 'Protocole', block: 'Bloc', next: 'Transactions suivantes',
     rc: 'Crédits de ressources', feed: 'Activité de la chaîne', bee: 'Abeille', pause: 'Pause', resume: 'Reprendre',
     soundOn: 'Son : oui', soundOff: 'Son : non',
-    padMove: 'DÉPLACER', padRotate: 'TOURNER', hardDrop: 'Lâcher', softDrop: 'Descendre', left: 'Gauche', right: 'Droite', rotL: 'Tourner ⟲', rotR: 'Tourner ⟳',
+    hardDrop: 'Lâcher', softDrop: 'Descendre', left: 'Gauche', right: 'Droite', rotL: 'Tourner ⟲', rotR: 'Tourner ⟳',
     holdAria: 'Pièce en réserve', boardAria: 'Plateau de jeu', nextAria: 'Pièces suivantes', empty: 'Vide',
     interest: 'Intérêts dans {n} blocs', interestX2: 'Intérêts dans {n} blocs, taux doublé', rcRate: '+{n}/s', freeze: 'Gravité en pause {s} s',
     feedWaiting: 'Les événements de la chaîne apparaîtront ici dès le début de la partie.', feedQuiet: 'Rien à signaler sur la chaîne.',
@@ -261,6 +285,14 @@ window.HT_I18N = {
 
   /* ------------------------------------------------------------------ 繁體中文 */
   'zh-Hant': {
+    padAim: '移動與旋轉',
+    padDrop: '落下',
+    tabPlay: '開始',
+    tabRules: '玩法',
+    tabControls: '操作',
+    tabRecords: '紀錄',
+    infoT: '版本與更新',
+    moreHint: '左右滑動看更多 →',
     'rule.seal.t': '共識之印',
     'rule.seal.d': 'HF26 起偶爾出現的 H 形方塊。它碰到的列只要填滿七成，就會自動補滿並消除，還有共識獎勵。',
     sealD: '封印 {n} 列 · 共識獎勵 +{g} HIVE',
@@ -287,7 +319,7 @@ window.HT_I18N = {
     kPauseMute: '暫停 / 音效', kLang: '語言', protocol: '協議版本', block: '區塊', next: '下一批交易',
     rc: '資源點數 RC', feed: '鏈上動態', bee: '工蜂', pause: '暫停', resume: '繼續',
     soundOn: '音效：開', soundOff: '音效：關',
-    padMove: '移動', padRotate: '旋轉', hardDrop: '硬降', softDrop: '軟降', left: '左', right: '右', rotL: '逆轉', rotR: '旋轉',
+    hardDrop: '硬降', softDrop: '軟降', left: '左', right: '右', rotL: '逆轉', rotR: '旋轉',
     holdAria: '保留的方塊', boardAria: '遊戲盤面', nextAria: '接下來的方塊', empty: '空',
     interest: '距離派息 {n} 個區塊', interestX2: '距離派息 {n} 個區塊，利率加倍', rcRate: '+{n}/秒', freeze: '重力暫停 {s} 秒',
     feedWaiting: '開始遊戲後，鏈上事件會出現在這裡。', feedQuiet: '這條鏈目前風平浪靜。',
@@ -343,6 +375,14 @@ window.HT_I18N = {
 
   /* ------------------------------------------------------------------ 简体中文 */
   'zh-Hans': {
+    padAim: '移动与旋转',
+    padDrop: '落下',
+    tabPlay: '开始',
+    tabRules: '玩法',
+    tabControls: '操作',
+    tabRecords: '纪录',
+    infoT: '版本与更新',
+    moreHint: '左右滑动查看更多 →',
     'rule.seal.t': '共识之印',
     'rule.seal.d': 'HF26 起偶尔出现的 H 形方块。它碰到的行只要填满七成，就会自动补满并消除，还有共识奖励。',
     sealD: '封印 {n} 行 · 共识奖励 +{g} HIVE',
@@ -369,7 +409,7 @@ window.HT_I18N = {
     kPauseMute: '暂停 / 音效', kLang: '语言', protocol: '协议版本', block: '区块', next: '下一批交易',
     rc: '资源点数 RC', feed: '链上动态', bee: '工蜂', pause: '暂停', resume: '继续',
     soundOn: '音效：开', soundOff: '音效：关',
-    padMove: '移动', padRotate: '旋转', hardDrop: '硬降', softDrop: '软降', left: '左', right: '右', rotL: '逆转', rotR: '旋转',
+    hardDrop: '硬降', softDrop: '软降', left: '左', right: '右', rotL: '逆转', rotR: '旋转',
     holdAria: '暂存的方块', boardAria: '游戏盘面', nextAria: '接下来的方块', empty: '空',
     interest: '距离派息 {n} 个区块', interestX2: '距离派息 {n} 个区块，利率翻倍', rcRate: '+{n}/秒', freeze: '重力暂停 {s} 秒',
     feedWaiting: '开始游戏后，链上事件会显示在这里。', feedQuiet: '这条链目前风平浪静。',
@@ -425,6 +465,14 @@ window.HT_I18N = {
 
   /* ------------------------------------------------------------------ 日本語 */
   ja: {
+    padAim: '移動・回転',
+    padDrop: '落下',
+    tabPlay: 'プレイ',
+    tabRules: '遊び方',
+    tabControls: '操作',
+    tabRecords: '記録',
+    infoT: 'バージョンと更新',
+    moreHint: '左右にスワイプで続き →',
     'rule.seal.t': '合意の印',
     'rule.seal.d': 'HF26 から時々出る H 形のレアピース。触れた列が 7 割埋まっていれば自動で埋めて消し、合意ボーナスがもらえます。',
     sealD: '{n} 列が合意 · ボーナス +{g} HIVE',
@@ -451,7 +499,7 @@ window.HT_I18N = {
     kPauseMute: '一時停止 / 効果音', kLang: '言語', protocol: 'プロトコル', block: 'ブロック', next: '次のトランザクション',
     rc: 'リソースクレジット', feed: 'チェーンの動き', bee: 'ハチ', pause: '一時停止', resume: '再開',
     soundOn: 'サウンド：オン', soundOff: 'サウンド：オフ',
-    padMove: '移動', padRotate: '回転', hardDrop: 'ハード', softDrop: 'ソフト', left: '左', right: '右', rotL: '左回転', rotR: '右回転',
+    hardDrop: 'ハード', softDrop: 'ソフト', left: '左', right: '右', rotL: '左回転', rotR: '右回転',
     holdAria: 'ホールド中のピース', boardAria: 'ゲーム盤面', nextAria: '次のピース', empty: '空',
     interest: '利息まであと {n} ブロック', interestX2: '利息まであと {n} ブロック（利率2倍）', rcRate: '+{n}/秒', freeze: '重力停止 {s} 秒',
     feedWaiting: 'ゲームを始めるとチェーンのイベントがここに表示されます。', feedQuiet: 'チェーンは平穏です。',
@@ -507,6 +555,14 @@ window.HT_I18N = {
 
   /* ------------------------------------------------------------------ 한국어 */
   ko: {
+    padAim: '이동 · 회전',
+    padDrop: '낙하',
+    tabPlay: '플레이',
+    tabRules: '규칙',
+    tabControls: '조작',
+    tabRecords: '기록',
+    infoT: '버전과 업데이트',
+    moreHint: '옆으로 넘겨 더 보기 →',
     'rule.seal.t': '합의의 인장',
     'rule.seal.d': 'HF26부터 가끔 나오는 H 모양 희귀 블록. 닿은 줄이 70% 이상 차 있으면 자동으로 채워 지우고 합의 보너스를 받아요.',
     sealD: '{n}줄 합의 · 보너스 +{g} HIVE',
@@ -533,7 +589,7 @@ window.HT_I18N = {
     kPauseMute: '일시정지 / 효과음', kLang: '언어', protocol: '프로토콜', block: '블록', next: '다음 트랜잭션',
     rc: '리소스 크레딧', feed: '체인 활동', bee: '일벌', pause: '일시정지', resume: '계속',
     soundOn: '소리: 켬', soundOff: '소리: 끔',
-    padMove: '이동', padRotate: '회전', hardDrop: '하드', softDrop: '소프트', left: '왼쪽', right: '오른쪽', rotL: '반시계', rotR: '시계',
+    hardDrop: '하드', softDrop: '소프트', left: '왼쪽', right: '오른쪽', rotL: '반시계', rotR: '시계',
     holdAria: '홀드한 블록', boardAria: '게임 보드', nextAria: '다음 블록', empty: '비어 있음',
     interest: '이자까지 {n}블록', interestX2: '이자까지 {n}블록, 이율 2배', rcRate: '+{n}/초', freeze: '중력 정지 {s}초',
     feedWaiting: '게임을 시작하면 체인 이벤트가 여기에 표시돼요.', feedQuiet: '체인이 조용해요.',
@@ -589,6 +645,14 @@ window.HT_I18N = {
 
   /* ------------------------------------------------------------------ हिन्दी */
   hi: {
+    padAim: 'खिसकाएँ · घुमाएँ',
+    padDrop: 'गिराएँ',
+    tabPlay: 'खेलें',
+    tabRules: 'नियम',
+    tabControls: 'नियंत्रण',
+    tabRecords: 'रिकॉर्ड',
+    infoT: 'संस्करण और अपडेट',
+    moreHint: 'और देखने के लिए बगल में स्वाइप करें →',
     'rule.seal.t': 'सहमति मुहर',
     'rule.seal.d': 'HF26 से कभी-कभी आने वाला दुर्लभ H आकार का टुकड़ा। यह जिन लाइनों को छूता है, उनमें से 70% भरी लाइनें अपने-आप भरकर साफ़ हो जाती हैं, साथ में सहमति बोनस।',
     sealD: '{n} लाइनें मुहरबंद · बोनस +{g} HIVE',
@@ -615,7 +679,7 @@ window.HT_I18N = {
     kPauseMute: 'रोकें / ध्वनि', kLang: 'भाषा', protocol: 'प्रोटोकॉल', block: 'ब्लॉक', next: 'अगले ट्रांज़ैक्शन',
     rc: 'रिसोर्स क्रेडिट', feed: 'चेन गतिविधि', bee: 'मधुमक्खी', pause: 'रोकें', resume: 'जारी रखें',
     soundOn: 'आवाज़: चालू', soundOff: 'आवाज़: बंद',
-    padMove: 'हिलाएँ', padRotate: 'घुमाएँ', hardDrop: 'गिराएँ', softDrop: 'नीचे', left: 'बाएँ', right: 'दाएँ', rotL: 'बाएँ घुमाएँ', rotR: 'दाएँ घुमाएँ',
+    hardDrop: 'गिराएँ', softDrop: 'नीचे', left: 'बाएँ', right: 'दाएँ', rotL: 'बाएँ घुमाएँ', rotR: 'दाएँ घुमाएँ',
     holdAria: 'होल्ड किया गया टुकड़ा', boardAria: 'गेम बोर्ड', nextAria: 'अगले टुकड़े', empty: 'खाली',
     interest: '{n} ब्लॉक में ब्याज', interestX2: '{n} ब्लॉक में ब्याज, दर दोगुनी', rcRate: '+{n}/से.', freeze: 'गुरुत्व रुका {s} से.',
     feedWaiting: 'खेल शुरू होते ही चेन की घटनाएँ यहाँ दिखेंगी।', feedQuiet: 'चेन पर सब शांत है।',

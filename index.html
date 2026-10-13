@@ -64,7 +64,8 @@
 :root:lang(hi) * { letter-spacing: 0 !important; }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html, body { height: 100%; }
+/* the whole game lives in one screen: views switch, the page itself never scrolls */
+html, body { height: 100%; overflow: hidden; }
 body {
   margin: 0;
   background-color: var(--bg);
@@ -89,10 +90,14 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--honey); outline
   align-items: start;
   max-width: 1080px;
   margin: 0 auto;
-  padding-block: 22px;
+  height: 100%;
+  overflow: hidden;
+  padding-block: max(16px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-bottom, 0px));
   padding-inline: 16px;
+  align-content: start;
 }
-.panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; max-height: var(--bh, none); overflow: hidden; }
+.panel .help, .panel .feed { flex: 1 1 auto; min-height: 0; overflow: hidden; }
 .box {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -239,8 +244,8 @@ kbd {
 }
 .ghost-btn:hover { color: var(--fg); border-color: var(--muted); }
 
-/* touch controls: utility pills on top, then two clearly separated pads.
-   Left pad = movement (square keys, cool tint). Right pad = rotation (round honey keys). */
+/* touch controls: utility pills on top, then two pads.
+   Left hand aims (rotate on top, move below). Right hand commits the drop (hard drop large, soft drop small). */
 .touch {
   --k: clamp(44px, calc((100vw - 72px) / 5.9), 66px);
   display: none;
@@ -248,7 +253,7 @@ kbd {
   justify-self: center;
   width: 100%; max-width: 480px;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 .touch button {
   touch-action: none; user-select: none; -webkit-user-select: none;
@@ -268,18 +273,18 @@ kbd {
 .t-pill small { display: inline; font: 500 10px var(--f-mono); color: var(--muted); }
 .t-pill.t-hold { border-color: var(--hbd); color: var(--hbd); }
 .t-pill.t-bee { border-color: var(--honey); color: var(--honey); }
-.t-pads { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-width: 0; }
+.t-pads { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; min-width: 0; }
 .t-label {
   display: block; margin-bottom: 6px; text-align: center;
   font: 600 10px/1 var(--f-display); letter-spacing: 0.16em; color: var(--muted);
 }
-.t-move .t-grid {
-  display: grid; gap: 6px;
-  grid-template-columns: repeat(3, var(--k));
+.t-aim .t-grid {
+  display: grid; gap: 8px 10px; justify-items: center; align-items: center;
+  grid-template-columns: repeat(2, calc(var(--k) * 1.2));
   grid-template-rows: var(--k) var(--k);
-  grid-template-areas: ". drop ." "left down right";
 }
 .t-key {
+  width: 100%; height: var(--k);
   border-radius: 14px;
   border: 2px solid var(--move-line);
   background: var(--move-bg);
@@ -289,28 +294,23 @@ kbd {
   box-shadow: 0 3px 0 var(--bg-deep);
 }
 .t-key small { color: var(--fg); opacity: 0.85; }
-.t-key.k-left { grid-area: left; } .t-key.k-right { grid-area: right; } .t-key.k-down { grid-area: down; }
-.t-key.k-drop { grid-area: drop; background: var(--hive); border-color: #ff5a78; color: #fff; }
-.t-key.k-drop small { color: #fff; opacity: 1; }
-.t-rot .t-grid { display: flex; align-items: flex-end; gap: 10px; height: calc(var(--k) * 2 + 6px); }
 .t-round {
   border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  font: 800 28px/1 var(--f-display);
+  font: 800 26px/1 var(--f-display);
   box-shadow: 0 3px 0 var(--bg-deep);
 }
-.t-round.r-ccw {
-  width: calc(var(--k) * 1.05); height: calc(var(--k) * 1.05);
-  background: var(--bg-deep); border: 2.5px solid var(--honey); color: var(--honey);
-}
-.t-round.r-cw {
-  width: calc(var(--k) * 1.35); height: calc(var(--k) * 1.35); align-self: flex-start;
-  background: var(--honey); border: 2.5px solid #ffd27a; color: #2a1406;
-  font-size: 34px;
-}
-.t-round.r-cw small { color: #2a1406; }
 .t-round small { max-width: 86%; text-align: center; line-height: 1.1; }
+.t-round.r-ccw, .t-round.r-cw { width: var(--k); height: var(--k); }
+.t-round.r-ccw { background: var(--bg-deep); border: 2.5px solid var(--honey); color: var(--honey); }
 .t-round.r-ccw small { color: var(--honey); }
+.t-round.r-cw { background: var(--honey); border: 2.5px solid #ffd27a; color: #2a1406; }
+.t-round.r-cw small { color: #2a1406; }
+.t-fall .t-grid { display: flex; align-items: flex-end; gap: 10px; height: calc(var(--k) * 2 + 8px); }
+.t-round.r-soft { width: calc(var(--k) * 1.05); height: calc(var(--k) * 1.05); background: var(--bg-deep); border: 2.5px solid #ff5a78; color: #ff8da0; }
+.t-round.r-soft small { color: #ff8da0; }
+.t-round.r-drop { width: calc(var(--k) * 1.4); height: calc(var(--k) * 1.4); align-self: flex-start; background: var(--hive); border: 2.5px solid #ff5a78; color: #fff; font-size: 32px; }
+.t-round.r-drop small { color: #fff; }
 
 /* overlay sheets */
 .overlay {
@@ -357,12 +357,31 @@ kbd {
 .result .total dd { font-size: 26px; color: var(--fg); }
 .record { color: var(--honey); font-weight: 700; margin: 0 0 14px; }
 
-/* home page */
+/* home page: header, one view at a time, tab bar; nothing scrolls vertically */
 .home {
-  max-width: 1080px; margin: 0 auto;
-  padding-block: 18px 48px; padding-inline: 16px;
-  display: flex; flex-direction: column; gap: 26px;
+  height: 100%; max-width: 1080px; margin: 0 auto;
+  padding-block: max(14px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-bottom, 0px)); padding-inline: 16px;
+  display: flex; flex-direction: column; gap: 12px;
 }
+.home-body { flex: 1 1 auto; min-height: 0; position: relative; }
+.hview { height: 100%; display: flex; flex-direction: column; gap: 12px; min-height: 0; overflow: hidden; }
+.hview-play { justify-content: center; }
+.hview > h2 { margin: 0; }
+.pager { flex: 1 1 auto; min-height: 0; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+.pager .cols { height: 100%; column-width: min(440px, calc(100vw - 48px)); column-gap: 28px; column-fill: auto; margin: 0; }
+.pager .rules { display: block; }
+.pager .rules li { break-inside: avoid; margin-bottom: 14px; }
+.pager .changelog { background: none; border: 0; padding: 0; }
+.pager .changelog section { break-inside: avoid; }
+.pager-hint { margin: 0; text-align: right; font-size: 11.5px; color: var(--honey); }
+.home-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.home-tabs button {
+  height: 44px; padding: 0 4px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel);
+  color: var(--muted); font: 600 12px/1.15 var(--f-body); cursor: pointer; overflow: hidden;
+}
+.home-tabs button#verBtn { font-family: var(--f-mono); font-size: 11px; }
+.home-tabs button[aria-selected="true"] { color: var(--fg); border-color: var(--hive); background: rgba(227, 19, 55, 0.14); }
+.feedback-link { color: var(--honey); }
 .home-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .globe { width: 16px; height: 16px; flex: none; }
 .lang-btn {
@@ -371,10 +390,10 @@ kbd {
   cursor: pointer; font-weight: 600; font-size: 13px;
 }
 .lang-btn:hover { border-color: var(--muted); }
-.hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 44px; align-items: center; }
+.hero { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 44px; align-items: center; justify-content: center; }
 .hero-art { line-height: 0; border-radius: 10px; border: 1px solid var(--line); overflow: hidden;
   box-shadow: 0 0 0 5px var(--bg-deep), 0 0 0 6px var(--line), 0 24px 70px rgba(227, 19, 55, 0.22); transform: rotate(-2deg); }
-.hero-copy { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.hero-copy { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .hero-copy h1 { margin: 0; font: 800 clamp(48px, 8vw, 84px)/0.92 var(--f-display); letter-spacing: 0.04em; text-wrap: balance; }
 .hero-copy h1 em { display: block; font-style: normal; font-family: var(--f-display); font-weight: 800; font-size: clamp(18px, 2.6vw, 28px); letter-spacing: 0.18em; color: var(--hive); margin-top: 10px; }
 .hero-copy .lead { margin: 0; font-size: 15px; max-width: 52ch; }
@@ -398,12 +417,8 @@ kbd {
 }
 .coach-step { flex: none; font: 700 11px var(--f-mono); color: var(--honey); }
 @keyframes hintPulse { 50% { box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.6), 0 3px 0 var(--bg-deep); } }
-.t-move.hint .t-key, .t-rot.hint .t-round { animation: hintPulse 1s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .t-move.hint .t-key, .t-rot.hint .t-round { animation: none; box-shadow: 0 0 0 3px rgba(245, 165, 36, 0.6); } }
-.home-foot { display: flex; flex-wrap: wrap; gap: 6px 10px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
-.home-foot a { color: var(--honey); }
-.ver-btn { margin-left: auto; background: none; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); font: 600 11.5px var(--f-mono); padding: 4px 10px; cursor: pointer; }
-.ver-btn:hover, .ver-btn[aria-expanded="true"] { color: var(--fg); border-color: var(--muted); }
+.touch button.hint { animation: hintPulse 1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .touch button.hint { animation: none; box-shadow: 0 0 0 3px rgba(245, 165, 36, 0.6); } }
 .changelog { flex-basis: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; font-family: "Noto Sans", system-ui, sans-serif; letter-spacing: 0; }
 .changelog h3 { margin: 0 0 10px; font: 700 12px var(--f-display); letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; }
 .changelog section + section { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
@@ -460,7 +475,7 @@ kbd {
   .player b { font-size: 11px; }
 }
 @media (max-width: 760px) {
-  .app { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; padding-block: 10px; }
+  .app { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; align-content: space-between; }
   .m-hide { display: none !important; }
   .box { padding: 8px; border-radius: 8px; }
   .box h3 { font-size: 10px; margin-bottom: 6px; letter-spacing: 0.06em; }
@@ -484,6 +499,30 @@ kbd {
   .touch { display: flex; }
 }
 @media (pointer: coarse) { .touch { display: flex; } }
+@media (max-height: 680px) { .hero-art { display: none; } .hero { grid-template-columns: minmax(0, 560px); } }
+@media (max-height: 680px) { .sheet .disclaimer { display: none; } .sheet .lead { font-size: 13px; } }
+@media (max-height: 760px) {
+  .hero-copy h1 { font-size: 44px; }
+  .hero-copy h1 em { font-size: 17px; margin-top: 6px; }
+  .start-card { padding: 14px; gap: 8px; }
+  .start-card input { height: 44px; }
+  .start-card .primary { height: 46px; }
+}
+@media (max-height: 700px) { .hero-copy .lead { display: none; } }
+@media (max-height: 620px) { .login-note { display: none; } .disclaimer { font-size: 11px; padding: 6px 10px; } }
+@media (max-width: 760px), (max-height: 700px) {
+  .sheet { padding: 18px 16px; }
+  .sheet h2 { font-size: 22px; }
+  .sheet .lead { margin: 6px 0 10px; }
+  .result { gap: 6px; margin: 10px 0 12px; }
+  .result div { padding: 6px 10px; }
+  .result dd { font-size: 15px; }
+  .result .total dd { font-size: 20px; }
+  .actions { gap: 8px; }
+  .actions .primary { padding: 11px 18px; font-size: 15px; }
+  .actions .secondary { padding: 10px 14px; }
+  .ver-note { margin-top: 10px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .banner, .rc-meter > i { transition: none; }
 }
@@ -495,29 +534,53 @@ kbd {
     <div class="brand"><span class="hexmark" aria-hidden="true"></span><div><b>HIVE</b><small>BLOCK PRODUCER</small></div></div>
     <button class="lang-btn" id="langBtnHome" type="button"></button>
   </header>
-  <div class="hero">
-    <div class="hero-art"><canvas id="heroCv" aria-hidden="true"></canvas></div>
-    <div class="hero-copy">
-      <h1>HIVE<em>BLOCK PRODUCER</em></h1>
-      <p class="lead" data-i18n="lead"></p>
-      <p class="disclaimer"><span data-i18n="disclaimer"></span> <span data-i18n="unofficial"></span></p>
-      <form class="start-card" id="startForm" autocomplete="off">
-        <label for="playerName" data-i18n="playerName">玩家名稱</label>
-        <input id="playerName" name="playerName" maxlength="16" data-i18n-ph="namePh" spellcheck="false">
-        <button class="primary" type="submit" data-i18n="guestPlay">以訪客身分開始</button>
-        <button class="secondary hive-login" type="button" disabled><span data-i18n="hiveLogin">用 Hive 帳號登入</span><small data-i18n="soon">規劃中</small></button>
-        <p class="note" data-i18n="loginNote"></p>
-      </form>
+  <div class="home-body">
+    <div class="hview hview-play" data-view="play" id="view-play" role="tabpanel">
+      <div class="hero">
+        <div class="hero-art"><canvas id="heroCv" aria-hidden="true"></canvas></div>
+        <div class="hero-copy">
+          <h1>HIVE<em>BLOCK PRODUCER</em></h1>
+          <p class="lead" data-i18n="lead"></p>
+          <form class="start-card" id="startForm" autocomplete="off">
+            <label for="playerName" data-i18n="playerName">玩家名稱</label>
+            <input id="playerName" name="playerName" maxlength="16" data-i18n-ph="namePh" spellcheck="false">
+            <button class="primary" type="submit" data-i18n="guestPlay">以訪客身分開始</button>
+            <button class="secondary hive-login" type="button" disabled><span data-i18n="hiveLogin">用 Hive 帳號登入</span><small data-i18n="soon">規劃中</small></button>
+            <p class="note login-note" data-i18n="loginNote"></p>
+          </form>
+          <p class="disclaimer"><span data-i18n="disclaimer"></span> <span data-i18n="unofficial"></span></p>
+        </div>
+      </div>
+    </div>
+    <div class="hview" data-view="rules" id="view-rules" role="tabpanel" hidden>
+      <h2 data-i18n="howTo">玩法</h2>
+      <div class="pager"><ul class="rules cols" id="homeRules"></ul></div>
+      <p class="pager-hint" data-i18n="moreHint" hidden></p>
+    </div>
+    <div class="hview" data-view="controls" id="view-controls" role="tabpanel" hidden>
+      <h2 data-i18n="controls">操作</h2>
+      <div class="keys" id="homeKeys"></div>
+      <p class="note" data-i18n="touchHint"></p>
+    </div>
+    <div class="hview" data-view="records" id="view-records" role="tabpanel" hidden>
+      <h2 data-i18n="records">紀錄</h2>
+      <div class="records-wrap" id="records"></div>
+    </div>
+    <div class="hview" data-view="info" id="view-info" role="tabpanel" hidden>
+      <h2 data-i18n="infoT">版本與更新</h2>
+      <p class="note"><span data-i18n="beta"></span> <a class="feedback-link" href="https://github.com/d-bot-2026/hive-block-producer/issues/new" target="_blank" rel="noopener" data-i18n="feedback"></a></p>
+      <p class="note" id="privacyNote" data-i18n="privacy" hidden></p>
+      <div class="pager"><div class="changelog cols" id="changelog" lang="en"></div></div>
+      <p class="pager-hint" data-i18n="moreHint" hidden></p>
     </div>
   </div>
-  <div class="home-grid">
-    <section class="box"><h2 data-i18n="howTo">玩法</h2><ul class="rules" id="homeRules"></ul></section>
-    <div class="col">
-      <section class="box"><h2 data-i18n="controls">操作</h2><div class="keys" id="homeKeys"></div><p class="note" data-i18n="touchHint"></p></section>
-      <section class="box"><h2 data-i18n="records">紀錄</h2><div class="records-wrap" id="records"></div></section>
-    </div>
-  </div>
-  <footer class="home-foot"><span data-i18n="beta"></span> <a href="https://github.com/d-bot-2026/hive-block-producer/issues/new" target="_blank" rel="noopener" data-i18n="feedback"></a><span id="privacyNote" data-i18n="privacy" hidden></span><button type="button" class="ver-btn" id="verBtn" aria-expanded="false" aria-controls="changelog"></button><div class="changelog" id="changelog" lang="en" hidden></div></footer>
+  <nav class="home-tabs" role="tablist">
+    <button type="button" role="tab" data-view="play" data-i18n="tabPlay">開始</button>
+    <button type="button" role="tab" data-view="rules" data-i18n="tabRules">玩法</button>
+    <button type="button" role="tab" data-view="controls" data-i18n="tabControls">操作</button>
+    <button type="button" role="tab" data-view="records" data-i18n="tabRecords">紀錄</button>
+    <button type="button" role="tab" data-view="info" id="verBtn"></button>
+  </nav>
 </section>
 
 <div class="app" id="app" hidden>
@@ -599,20 +662,20 @@ kbd {
       <button type="button" data-act="lang" class="t-pill" id="langBtn2"></button>
     </div>
     <div class="t-pads">
-      <div class="t-move" role="group" data-i18n-aria="kMove" aria-label="移動">
-        <span class="t-label" data-i18n="padMove">移動</span>
-        <div class="t-grid">
-          <button type="button" data-act="drop" class="t-key k-drop">⤓<small data-i18n="hardDrop">硬降</small></button>
-          <button type="button" data-act="left" class="t-key k-left">◀<small data-i18n="left">左</small></button>
-          <button type="button" data-act="down" class="t-key k-down">▼<small data-i18n="softDrop">軟降</small></button>
-          <button type="button" data-act="right" class="t-key k-right">▶<small data-i18n="right">右</small></button>
-        </div>
-      </div>
-      <div class="t-rot" role="group" data-i18n-aria="kRotate" aria-label="旋轉">
-        <span class="t-label" data-i18n="padRotate">旋轉</span>
+      <div class="t-aim" role="group" data-i18n-aria="padAim" aria-label="移動與旋轉">
+        <span class="t-label" data-i18n="padAim">移動與旋轉</span>
         <div class="t-grid">
           <button type="button" data-act="rotateL" class="t-round r-ccw">↺<small data-i18n="rotL">逆轉</small></button>
           <button type="button" data-act="rotate" class="t-round r-cw">↻<small data-i18n="rotR">旋轉</small></button>
+          <button type="button" data-act="left" class="t-key k-left">◀<small data-i18n="left">左</small></button>
+          <button type="button" data-act="right" class="t-key k-right">▶<small data-i18n="right">右</small></button>
+        </div>
+      </div>
+      <div class="t-fall" role="group" data-i18n-aria="padDrop" aria-label="落下">
+        <span class="t-label" data-i18n="padDrop">落下</span>
+        <div class="t-grid">
+          <button type="button" data-act="down" class="t-round r-soft">▼<small data-i18n="softDrop">軟降</small></button>
+          <button type="button" data-act="drop" class="t-round r-drop">⤓<small data-i18n="hardDrop">硬降</small></button>
         </div>
       </div>
     </div>
@@ -1410,6 +1473,7 @@ function showHome() {
   $('#app').hidden = true; $('#home').hidden = false;
   $('#playerName').value = playerName;
   renderHome();
+  setHomeView('play');
   updateButtons();
   musicSync();
   window.scrollTo(0, 0);
@@ -1602,22 +1666,28 @@ function layout() {
   const vw = Math.min(window.innerWidth, document.documentElement.clientWidth || Infinity, (screen && screen.width) || Infinity);
   const mobile = vw <= 760;
   const touch = mobile || matchMedia('(pointer: coarse)').matches;
+  // size the board from the space that is really left, so the game always fits one screen
+  const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  const appCs = getComputedStyle($('#app'));
+  const padY = (parseFloat(appCs.paddingTop) || 0) + (parseFloat(appCs.paddingBottom) || 0);
+  const touchEl = $('#touch');
+  const touchH = touch ? ((touchEl.offsetHeight || 200) + (parseFloat(appCs.rowGap) || 8)) : 0;
+  const byH = (vh - padY - touchH - 4) / ROWS;
   if (mobile) {
     const rail = Math.max(60, Math.min(96, Math.floor(vw * 0.16)));
     const byW = (vw - 32 - rail * 2 - 16) / COLS;
-    const byH = (window.innerHeight - 20 - (touch ? 210 : 0)) / ROWS;
-    cs = Math.max(16, Math.min(30, Math.floor(Math.min(byW, byH))));
+    cs = Math.max(12, Math.min(30, Math.floor(Math.min(byW, byH))));
     pcs = Math.max(9, Math.floor((rail - 18) / 4.4));
   } else {
-    const byH = (window.innerHeight - 50 - (touch ? 210 : 0)) / ROWS;
-    cs = Math.max(20, Math.min(34, Math.floor(byH)));
+    cs = Math.max(14, Math.min(34, Math.floor(byH)));
     pcs = 18;
   }
+  $('#app').style.setProperty('--bh', (cs * ROWS + 2) + 'px');
   sizeCanvas(boardCv, cs * COLS, cs * ROWS);
   sizeCanvas(holdCv, pcs * 4.6, pcs * 3);
   sizeCanvas(nextCv, pcs * 4.6, pcs * (mobile ? 6.6 : 9.6));
 }
-addEventListener('resize', () => { layout(); drawHero(); });
+addEventListener('resize', () => { layout(); drawHero(); updatePagerHints(); });
 
 function shadeHex(hex, amt) {
   const n = parseInt(hex.slice(1), 16);
@@ -1838,8 +1908,8 @@ function renderCoach() {
   const on = !!coach && coach.step >= 0;
   box.hidden = !on;
   const tch = touchUI();
-  $('.t-move').classList.toggle('hint', on && tch && coach.step === 0);
-  $('.t-rot').classList.toggle('hint', on && tch && coach.step === 1);
+  document.querySelectorAll('.k-left, .k-right').forEach(b => b.classList.toggle('hint', on && tch && coach.step === 0));
+  document.querySelectorAll('.r-ccw, .r-cw').forEach(b => b.classList.toggle('hint', on && tch && coach.step === 1));
   if (!on) return;
   const key = coach.step === 0 ? (tch ? 'coachMoveTouch' : 'coachMoveKeys') : coach.step === 1 ? (tch ? 'coachRotTouch' : 'coachRotKeys') : 'coachGoal';
   $('#coachStep').textContent = `${coach.step + 1}/3`;
@@ -1883,14 +1953,26 @@ S.board = demoBoard();
 const RELEASES = window.HBP_RELEASES || [{ version: '0.0.0', date: '', notes: [] }];
 const VERSION = RELEASES[0];
 function renderVersion() {
-  $('#verBtn').textContent = `v${VERSION.version} · ${VERSION.date}`;
-  $('#changelog').innerHTML = '<h3>Changelog</h3>' + RELEASES.map(r =>
+  $('#verBtn').textContent = `v${VERSION.version}`;
+  $('#verBtn').title = `v${VERSION.version} · ${VERSION.date}`;
+  $('#changelog').innerHTML = RELEASES.map(r =>
     `<section><h4>v${escapeHtml(r.version)}<span>${escapeHtml(r.date)}</span></h4><ul>${r.notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')}</ul></section>`).join('');
 }
-$('#verBtn').addEventListener('click', () => {
-  const box = $('#changelog'), open = box.hidden;
-  box.hidden = !open; $('#verBtn').setAttribute('aria-expanded', String(open));
-});
+let homeView = 'play';
+function setHomeView(v) {
+  homeView = v;
+  document.querySelectorAll('.hview').forEach(el => { el.hidden = el.dataset.view !== v; });
+  document.querySelectorAll('.home-tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+  if (v === 'play') drawHero();
+  requestAnimationFrame(updatePagerHints);
+}
+function updatePagerHints() {
+  document.querySelectorAll('.hview').forEach(view => {
+    const pg = view.querySelector('.pager'), hint = view.querySelector('.pager-hint');
+    if (pg && hint) hint.hidden = view.hidden || pg.scrollWidth <= pg.clientWidth + 4;
+  });
+}
+document.querySelectorAll('.home-tabs button').forEach(b => b.addEventListener('click', () => setHomeView(b.dataset.view)));
 renderVersion();
 // test hooks, only when the file is opened locally (never on the public site)
 if (location.protocol === 'file:') {

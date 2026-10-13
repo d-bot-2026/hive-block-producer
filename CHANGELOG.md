@@ -5,6 +5,11 @@ Versions follow vMAJOR.MINOR.PATCH: new features bump MINOR, bug fixes bump PATC
 
 <!-- Generated from version.js by scripts/changelog.js. Edit version.js, not this file. -->
 
+## v0.7.0 (2026-10-13)
+
+- Phone controls regrouped by hand: rotate and move on the left, soft and hard drop on the right.
+- Everything fits one screen: the home page switches between Play, Rules, Controls, Records and Version tabs, and long lists swipe sideways instead of scrolling.
+
 ## v0.6.0 (2026-10-13)
 
 - New rare piece: the Consensus Seal, an H-shaped block from HF26 that fills and clears rows that are at least 70% full.
