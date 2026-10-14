@@ -5,7 +5,7 @@ Versions follow vMAJOR.MINOR.PATCH: new features bump MINOR, bug fixes bump PATC
 
 <!-- Generated from version.js by scripts/changelog.js. Edit version.js, not this file. -->
 
-## v0.7.0 (2026-10-13)
+## v0.7.0 (2026-10-14)
 
 - Phone controls regrouped by hand: rotate and move on the left, soft and hard drop on the right.
 - Everything fits one screen: the home page switches between Play, Rules, Controls, Records and Version tabs, and long lists swipe sideways instead of scrolling.

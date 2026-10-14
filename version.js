@@ -5,7 +5,7 @@
 window.HBP_RELEASES = [
   {
     version: '0.7.0',
-    date: '2026-10-13',
+    date: '2026-10-14',
     notes: [
       'Phone controls regrouped by hand: rotate and move on the left, soft and hard drop on the right.',
       'Everything fits one screen: the home page switches between Play, Rules, Controls, Records and Version tabs, and long lists swipe sideways instead of scrolling.',
