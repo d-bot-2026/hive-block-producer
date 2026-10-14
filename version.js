@@ -4,6 +4,15 @@
    Versioning: vMAJOR.MINOR.PATCH. New features bump MINOR, bug fixes bump PATCH; v1.0.0 marks the end of beta. */
 window.HBP_RELEASES = [
   {
+    version: '0.8.0',
+    date: '2026-10-14',
+    notes: [
+      'Phone controls rebuilt for the thumbs: a big clockwise rotate in the middle of a left-hand cross (move beside it, soft drop below, small counter-clockwise above), and only the hard drop on the right.',
+      'Clearer specials: the flag bomb now clears its whole column, the Consensus Seal shows x/10 counters on every row it would touch, each special explains itself the first time, and the bee button lights up when you can afford one.',
+      'On-screen goals (lines to the next hardfork, your best), no accidental restart right after a game over, a turn-your-phone notice, and groundwork for versus play and Hive login.',
+    ],
+  },
+  {
     version: '0.7.0',
     date: '2026-10-14',
     notes: [

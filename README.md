@@ -13,3 +13,7 @@ Feedback and bug reports: [Issues](https://github.com/d-bot-2026/hive-block-prod
 ## Versions
 
 The current version and release notes live in `version.js` (shown in the game footer). After adding a release there, run `node scripts/changelog.js` to regenerate [CHANGELOG.md](CHANGELOG.md).
+
+## Versus play and Hive login (in progress)
+
+`net/` holds the browser modules and `server/` a small reference server. They are built and tested but not switched on yet. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how they fit and the planned order.

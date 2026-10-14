@@ -247,7 +247,7 @@ kbd {
 /* touch controls: utility pills on top, then two pads.
    Left hand aims (rotate on top, move below). Right hand commits the drop (hard drop large, soft drop small). */
 .touch {
-  --k: clamp(44px, calc((100vw - 72px) / 5.9), 66px);
+  --k: clamp(42px, calc((100vw - 72px) / 5.6), 62px);
   display: none;
   grid-column: 1 / -1;
   justify-self: center;
@@ -278,22 +278,28 @@ kbd {
   display: block; margin-bottom: 6px; text-align: center;
   font: 600 10px/1 var(--f-display); letter-spacing: 0.16em; color: var(--muted);
 }
+/* Left thumb rests on the big clockwise rotate in the middle of a cross: move left/right beside it,
+   soft drop below, the rarer counter-clockwise rotate small above. The right thumb only commits the drop. */
 .t-aim .t-grid {
-  display: grid; gap: 8px 10px; justify-items: center; align-items: center;
-  grid-template-columns: repeat(2, calc(var(--k) * 1.2));
-  grid-template-rows: var(--k) var(--k);
+  display: grid; gap: 6px 8px; justify-items: center; align-items: center;
+  grid-template-columns: var(--k) calc(var(--k) * 1.3) var(--k);
+  grid-template-rows: calc(var(--k) * 0.78) calc(var(--k) * 1.3) calc(var(--k) * 0.82);
+  grid-template-areas: ". ccw ." "left cw right" ". soft .";
 }
 .t-key {
-  width: 100%; height: var(--k);
+  width: 100%; height: 100%;
   border-radius: 14px;
   border: 2px solid var(--move-line);
   background: var(--move-bg);
   color: var(--move);
-  font: 800 24px/1 var(--f-display);
+  font: 800 22px/1 var(--f-display);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   box-shadow: 0 3px 0 var(--bg-deep);
 }
 .t-key small { color: var(--fg); opacity: 0.85; }
+.t-key.k-left { grid-area: left; height: calc(var(--k) * 1.15); }
+.t-key.k-right { grid-area: right; height: calc(var(--k) * 1.15); }
+.t-key.k-soft { grid-area: soft; width: calc(var(--k) * 1.3); flex-direction: row; gap: 6px; font-size: 18px; }
 .t-round {
   border-radius: 50%;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
@@ -301,16 +307,13 @@ kbd {
   box-shadow: 0 3px 0 var(--bg-deep);
 }
 .t-round small { max-width: 86%; text-align: center; line-height: 1.1; }
-.t-round.r-ccw, .t-round.r-cw { width: var(--k); height: var(--k); }
-.t-round.r-ccw { background: var(--bg-deep); border: 2.5px solid var(--honey); color: var(--honey); }
-.t-round.r-ccw small { color: var(--honey); }
-.t-round.r-cw { background: var(--honey); border: 2.5px solid #ffd27a; color: #2a1406; }
+.t-round.r-cw { grid-area: cw; width: calc(var(--k) * 1.3); height: calc(var(--k) * 1.3); background: var(--honey); border: 2.5px solid #ffd27a; color: #2a1406; font-size: 34px; }
 .t-round.r-cw small { color: #2a1406; }
-.t-fall .t-grid { display: flex; align-items: flex-end; gap: 10px; height: calc(var(--k) * 2 + 8px); }
-.t-round.r-soft { width: calc(var(--k) * 1.05); height: calc(var(--k) * 1.05); background: var(--bg-deep); border: 2.5px solid #ff5a78; color: #ff8da0; }
-.t-round.r-soft small { color: #ff8da0; }
-.t-round.r-drop { width: calc(var(--k) * 1.4); height: calc(var(--k) * 1.4); align-self: flex-start; background: var(--hive); border: 2.5px solid #ff5a78; color: #fff; font-size: 32px; }
-.t-round.r-drop small { color: #fff; }
+.t-round.r-ccw { grid-area: ccw; width: calc(var(--k) * 0.78); height: calc(var(--k) * 0.78); background: var(--bg-deep); border: 2px solid var(--honey); color: var(--honey); font-size: 18px; }
+.t-round.r-ccw small { display: none; }
+.t-fall .t-grid { display: flex; align-items: flex-end; justify-content: center; height: calc(var(--k) * 2.9 + 12px); padding-bottom: calc(var(--k) * 0.1); }
+.t-round.r-drop { width: calc(var(--k) * 1.75); height: calc(var(--k) * 1.75); background: var(--hive); border: 3px solid #ff5a78; color: #fff; font-size: 40px; }
+.t-round.r-drop small { color: #fff; font-size: 11.5px; }
 
 /* overlay sheets */
 .overlay {
@@ -415,6 +418,19 @@ kbd {
   background: rgba(16, 6, 11, 0.94); border: 1px solid var(--honey); border-radius: 10px;
   padding: 8px 12px; color: var(--fg); font-size: 13px; line-height: 1.4; cursor: pointer;
 }
+.toast {
+  position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%);
+  width: max-content; max-width: 92%; text-align: center;
+  background: rgba(16, 6, 11, 0.94); border: 1px solid var(--honey); color: var(--honey);
+  border-radius: 99px; padding: 6px 12px; font: 700 12px/1.3 var(--f-body);
+}
+@keyframes readyGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(245, 165, 36, 0); } 50% { box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.55); } }
+.t-pill.t-bee.ready, .skill.ready { background: rgba(245, 165, 36, 0.16); }
+.t-pill.t-bee.pulse, .skill.pulse { animation: readyGlow 0.8s ease-in-out 3; }
+.hf-prog { margin-top: 8px; font: 500 11px/1.3 var(--f-mono); color: var(--muted); }
+.hf-prog .bar > i { background: var(--honey); }
+.rotate-hint { display: none; position: fixed; inset: 0; z-index: 40; background: var(--bg); color: var(--fg); align-items: center; justify-content: center; text-align: center; padding: 24px; font: 700 18px/1.5 var(--f-body); }
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 520px) { .rotate-hint { display: flex; } }
 .coach-step { flex: none; font: 700 11px var(--f-mono); color: var(--honey); }
 @keyframes hintPulse { 50% { box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.6), 0 3px 0 var(--bg-deep); } }
 .touch button.hint { animation: hintPulse 1s ease-in-out infinite; }
@@ -594,6 +610,7 @@ kbd {
       <div class="player"><b id="pName"></b><small data-i18n="guest">訪客</small></div>
       <div class="stat big"><label data-i18n="wallet">錢包</label><div class="num"><span id="hive">0.000</span><small>HIVE</small></div></div>
       <div class="stat hbd"><label data-i18n="hbdSavings">HBD 儲蓄</label><div class="num"><span id="hbd">0.000</span><small>HBD</small></div><div class="sub m-hide" id="interest"></div></div>
+      <div class="sub m-hide" id="bestLine"></div>
       <div class="row2">
         <div class="stat"><label data-i18n="lines">清除列數</label><div class="num" id="lines">0</div></div>
         <div class="stat"><label data-i18n="combo">策展連擊</label><div class="num" id="combo">0</div></div>
@@ -619,6 +636,7 @@ kbd {
       <canvas id="board" data-i18n-aria="boardAria" aria-label="遊戲盤面"></canvas>
       <div class="banner" id="banner" role="status" aria-live="polite"></div>
       <div class="freeze" id="freeze" hidden></div>
+      <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
       <div class="coach" id="coach" role="status" aria-live="polite" hidden><span class="coach-step" id="coachStep"></span><span id="coachText"></span></div>
     </div>
   </main>
@@ -627,6 +645,7 @@ kbd {
     <section class="box chain">
       <div class="hf"><label data-i18n="protocol">協議版本</label><b id="hf">HF24</b></div>
       <div class="era" id="era"><b id="era-name"></b><span id="era-desc"></span></div>
+      <div class="hf-prog"><span class="m-hide" id="hfNext"></span><span class="bar"><i id="hfbar"></i></span></div>
       <div class="blk m-hide"><span data-i18n="block">區塊</span> <b id="height">#0</b><span class="bar"><i id="blockbar"></i></span></div>
     </section>
     <section class="box">
@@ -666,15 +685,15 @@ kbd {
         <span class="t-label" data-i18n="padAim">移動與旋轉</span>
         <div class="t-grid">
           <button type="button" data-act="rotateL" class="t-round r-ccw">↺<small data-i18n="rotL">逆轉</small></button>
-          <button type="button" data-act="rotate" class="t-round r-cw">↻<small data-i18n="rotR">旋轉</small></button>
           <button type="button" data-act="left" class="t-key k-left">◀<small data-i18n="left">左</small></button>
+          <button type="button" data-act="rotate" class="t-round r-cw">↻<small data-i18n="rotR">旋轉</small></button>
           <button type="button" data-act="right" class="t-key k-right">▶<small data-i18n="right">右</small></button>
+          <button type="button" data-act="down" class="t-key k-soft">▼<small data-i18n="softDrop">軟降</small></button>
         </div>
       </div>
       <div class="t-fall" role="group" data-i18n-aria="padDrop" aria-label="落下">
         <span class="t-label" data-i18n="padDrop">落下</span>
         <div class="t-grid">
-          <button type="button" data-act="down" class="t-round r-soft">▼<small data-i18n="softDrop">軟降</small></button>
           <button type="button" data-act="drop" class="t-round r-drop">⤓<small data-i18n="hardDrop">硬降</small></button>
         </div>
       </div>
@@ -682,6 +701,7 @@ kbd {
   </div>
 </div>
 
+<div class="rotate-hint" id="rotateHint" data-i18n="rotateHint"></div>
 <div class="overlay" id="overlay"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
 
 <script src="version.js"></script>
@@ -737,6 +757,9 @@ const clone = m => m.map(r => r.slice());
 const emptyRow = () => Array(COLS).fill(null);
 const newBoard = () => Array.from({ length: ROWS }, emptyRow);
 const fmt3 = milli => (milli / 1000).toFixed(3);
+// mulberry32: small seeded PRNG so a piece sequence can be replayed or shared by two players
+function makeRng(seed) { let a = seed >>> 0; return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const shuffleWith = (a, r) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -916,7 +939,7 @@ function freshState() {
     rc: RC_MAX, t: 0, blockAcc: 0, height: 101000000 + rint(0, 899999), blocks: 0,
     nextEvent: 12000, frozenUntil: 0, dropAcc: 0, lockT: 0, lockResets: 0, clearing: null,
     fx: [], parts: [], feed: [], feedDirty: true, pieceCount: 0, shake: 0, beesSummoned: 0,
-    warm: true, placed: 0,
+    warm: true, placed: 0, seed: 0, rng: Math.random, overAt: 0, beeReadyShown: -1e9, holeHintAt: -1e9, bestNow: 0, pbShown: false,
   };
 }
 const lvl = () => (S.hf - 24) + (S.era.id === 'fast' ? 2 : 0);
@@ -931,9 +954,10 @@ function makeQ(type) {
     const coinP = 0.10 * (S.era.id === 'air' ? 3 : 1);
     const cells = [];
     m.forEach((r, y) => r.forEach((v, x) => { if (v) cells.push([y, x]); }));
-    const r = Math.random();
-    if (r < coinP) { const [y, x] = pick(cells); m[y][x] = 2; }
-    else if (r < coinP + 0.06) { const [y, x] = pick(cells); m[y][x] = 3; }
+    const r = S.rng();
+    const cell = () => cells[Math.floor(S.rng() * cells.length)];
+    if (r < coinP) { const [y, x] = cell(); m[y][x] = 2; }
+    else if (r < coinP + 0.06) { const [y, x] = cell(); m[y][x] = 3; }
   }
   return { type, base: m };
 }
@@ -943,15 +967,15 @@ const SEAL_MIN = Math.ceil(COLS * SEAL_FILL);
 function genPiece() {
   S.pieceCount++;
   if (S.era.id === 'bee' && S.pieceCount % 7 === 0) return makeQ('B');
-  if (S.hf >= 25 && Math.random() < 0.035) return makeQ('F');
-  if (S.hf >= SEAL_MIN_HF && !S.warm && Math.random() < SEAL_CHANCE) return makeQ('H');
-  if (!S.bag.length) S.bag = shuffle(['I', 'O', 'T', 'S', 'Z', 'J', 'L']);
+  if (S.hf >= 25 && S.rng() < 0.035) return makeQ('F');
+  if (S.hf >= SEAL_MIN_HF && !S.warm && S.rng() < SEAL_CHANCE) return makeQ('H');
+  if (!S.bag.length) S.bag = shuffleWith(['I', 'O', 'T', 'S', 'Z', 'J', 'L'], S.rng);
   return makeQ(S.bag.pop());
 }
 function firstBag() {
   // the first two pieces of a game are never S or Z, the hardest shapes to place on an empty board
-  const b = shuffle(['I', 'O', 'T', 'J', 'L']);
-  return [...shuffle(['S', 'Z']), ...b];
+  const b = shuffleWith(['I', 'O', 'T', 'J', 'L'], S.rng);
+  return [...shuffleWith(['S', 'Z'], S.rng), ...b];
 }
 function fillQueue() { while (S.queue.length < 4) S.queue.push(genPiece()); }
 function makeActive(q) {
@@ -976,14 +1000,14 @@ function cellsOf(p) {
 
 /* ---------- feed / banner / fx ---------- */
 let bannerTimer = 0;
-function banner(title, sub, tone = 'info') {
+function banner(title, sub, tone = 'info', ms = 1900) {
   el.banner.innerHTML = '';
   const b = document.createElement('b'); b.textContent = title;
   const s = document.createElement('span'); s.textContent = sub;
   el.banner.append(b, s);
   el.banner.className = 'banner show ' + tone;
   clearTimeout(bannerTimer);
-  bannerTimer = setTimeout(() => el.banner.classList.remove('show'), 1900);
+  bannerTimer = setTimeout(() => el.banner.classList.remove('show'), ms);
 }
 function log(key, params = {}, tone = 'info') {
   S.feed.unshift({ h: S.height, key, params, tone });
@@ -1024,6 +1048,7 @@ function spawn() {
   fillQueue();
   S.cur = makeActive(S.queue.shift());
   fillQueue();
+  if (S.cur.special) tipOnce(S.cur.special);
   S.lockT = 0; S.lockResets = 0; S.dropAcc = 0;
   if (collides(S.cur, 0, 0)) gameOver();
 }
@@ -1090,16 +1115,17 @@ function lockPiece() {
     floatText(t('fFill'), p.x + 0.5, ty + 0.2, '#ffc93c');
     sfx('bee');
   } else if (p.special === 'flag') {
+    // the flag clears its whole column, top to bottom, so it never leaves floating blocks or new holes
     let n = 0, coins = 0;
-    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-      const x = p.x + dx, y = p.y + dy;
-      if (x < 0 || x >= COLS || y < 0 || y >= ROWS || !S.board[y][x]) continue;
-      if (S.board[y][x].k === 'coin') coins++;
-      S.board[y][x] = null; n++;
+    for (let y = 0; y < ROWS; y++) {
+      const cell = S.board[y][p.x];
+      if (!cell) continue;
+      if (cell.k === 'coin') coins++;
+      S.board[y][p.x] = null; n++;
+      burst(p.x + 0.5, y + 0.5, y % 2 ? '#ff5d73' : '#f5a524', 3, 6);
     }
     addHive((n * 30 + coins * 50) * mult());
-    burst(p.x + 0.5, p.y + 0.5, '#ff5d73', 26, 9);
-    burst(p.x + 0.5, p.y + 0.5, '#f5a524', 14, 6);
+    burst(p.x + 0.5, p.y + 0.5, '#ff5d73', 18, 9);
     floatText(n ? t('fFlag', { n }) : t('fFlagMiss'), p.x + 0.5, p.y, '#ff5d73');
     if (!REDUCED) S.shake = 260;
     sfx('boom');
@@ -1158,6 +1184,7 @@ function checkLines(fromLock) {
   addHive(gain);
   if (hbds) S.hbd += hbds * 500;
   S.lines += n;
+  emit('lines', { n, sealed: rows.some(y => S.board[y].some(c => c && c.t === 'H')), combo: S.combo, hf: S.hf });
   S.warm = false;
   store.set(CLEARED_KEY, '1');
   endCoach();
@@ -1336,7 +1363,7 @@ addEventListener('keydown', e => {
   if (langOpen) { if (e.code === 'Escape') { e.preventDefault(); closeLangMenu(); } return; }
   if (e.code === 'KeyL') { e.preventDefault(); if (!e.repeat) openLangMenu(); return; }
   if (S.state === 'title') return;
-  if (S.state === 'over' && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); startGame(); return; }
+  if (S.state === 'over' && (e.code === 'Enter' || e.code === 'Space')) { e.preventDefault(); if (!e.repeat && performance.now() - S.overAt > 1200) startGame(); return; }
   if (S.state === 'pause' && e.code === 'Enter') { e.preventDefault(); togglePause(); return; }
   const a = KEYMAP[e.code];
   if (!a) return;
@@ -1446,11 +1473,15 @@ function bestTotal() {
   return Math.max(runs.length ? runs[0].t : 0, parseInt(store.get('hive-tetris-best') || '0', 10) || 0);
 }
 let lastRunId = 0;
-function startGame() {
+function startGame(opts = {}) {
   track('game-start', 'Game started');
   initAudio();
   S = freshState();
   S.state = 'play';
+  S.seed = (opts.seed >>> 0) || ((Math.random() * 4294967296) >>> 0);
+  S.rng = makeRng(S.seed);
+  S.bestNow = bestTotal();
+  lastRc = RC_MAX;
   held.h = null; held.down = false;
   S.bag = firstBag();
   fillQueue();
@@ -1464,6 +1495,7 @@ function startGame() {
   updateButtons();
   sfx('fork');
   musicSync();
+  emit('start', { seed: S.seed });
 }
 function showHome() {
   endCoach();
@@ -1497,10 +1529,11 @@ function togglePause() {
 }
 function gameOver() {
   if (S.state === 'over') return;
-  S.state = 'over'; S.cur = null;
+  S.state = 'over'; S.cur = null; S.overAt = performance.now();
   musicSync();
   sfx('over');
   endCoach();
+  emit('over', { total: S.hive + S.hbd, lines: S.lines, hf: S.hfMax, seconds: Math.round(S.t / 1000) });
   track('game-over', `Game over: ${S.lines} lines, ${S.placed} pieces, ${Math.round(S.t / 1000)}s, HF${S.hfMax}`);
   const total = S.hive + S.hbd;
   const best = bestTotal();
@@ -1687,7 +1720,10 @@ function layout() {
   sizeCanvas(holdCv, pcs * 4.6, pcs * 3);
   sizeCanvas(nextCv, pcs * 4.6, pcs * (mobile ? 6.6 : 9.6));
 }
-addEventListener('resize', () => { layout(); drawHero(); updatePagerHints(); });
+addEventListener('resize', () => {
+  layout(); drawHero(); updatePagerHints();
+  if (S && S.state === 'play' && getComputedStyle($('#rotateHint')).display !== 'none') togglePause();
+});
 
 function shadeHex(hex, amt) {
   const n = parseInt(hex.slice(1), 16);
@@ -1801,12 +1837,22 @@ function render() {
     } else {
       const gy = ghostY(p);
       if (p.special === 'flag') {
-        c.save(); c.strokeStyle = 'rgba(255,93,115,0.55)'; c.setLineDash([4, 4]); c.lineWidth = 2;
-        c.strokeRect((p.x - 1) * cs + 2, (gy - 1) * cs + 2, cs * 3 - 4, cs * 3 - 4); c.restore();
+        c.save(); c.fillStyle = 'rgba(255,93,115,0.10)'; c.fillRect(p.x * cs, 0, cs, H);
+        c.strokeStyle = 'rgba(255,93,115,0.6)'; c.setLineDash([4, 4]); c.lineWidth = 2;
+        c.strokeRect(p.x * cs + 1, 1, cs - 2, H - 2); c.restore();
       }
       if (p.special === 'seal') {
         c.save(); c.fillStyle = 'rgba(245,165,36,0.13)'; c.strokeStyle = 'rgba(245,165,36,0.65)'; c.setLineDash([4, 4]); c.lineWidth = 1.5;
-        for (const y of sealRows({ ...p, y: gy })) { c.fillRect(0, y * cs, W, cs); c.strokeRect(1, y * cs + 1, W - 2, cs - 2); }
+        const gp = { ...p, y: gy }, ok = sealRows(gp);
+        for (const y of ok) { c.fillRect(0, y * cs, W, cs); c.strokeRect(1, y * cs + 1, W - 2, cs - 2); }
+        c.setLineDash([]); c.textAlign = 'right'; c.textBaseline = 'middle';
+        c.font = `800 ${Math.round(cs * 0.46)}px ${'JetBrains Mono'}, monospace`;
+        for (const y of [...new Set(cellsOf(gp).map(q => q[1]))].filter(y => y >= 0)) {
+          const n = S.board[y].filter(Boolean).length + cellsOf(gp).filter(q => q[1] === y && !S.board[y][q[0]]).length;
+          const label = `${n}/${COLS}`, x = W - 3, yy = y * cs + cs / 2;
+          c.lineWidth = 3; c.strokeStyle = 'rgba(18,7,12,0.9)'; c.strokeText(label, x, yy);
+          c.fillStyle = n >= SEAL_MIN ? '#f5a524' : '#b39aa4'; c.fillText(label, x, yy);
+        }
         c.restore();
       }
       if (gy !== p.y) for (const [x, y] of cellsOf({ ...p, y: gy })) if (y >= 0) drawOutline(c, x * cs, y * cs, cs, p.special === 'flag' ? '#ff5d73' : color);
@@ -1852,6 +1898,44 @@ function render() {
 }
 const textCache = new WeakMap();
 function setText(node, v) { if (textCache.get(node) !== v) { textCache.set(node, v); node.textContent = v; } }
+let toastTimer = 0;
+function toast(text, ms = 2600) {
+  const el2 = $('#toast'); el2.textContent = text; el2.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { el2.hidden = true; }, ms);
+}
+const TIPS_KEY = 'hive-tetris-tips';
+// explain each special piece once per device, the first time it is actually in your hands
+function tipOnce(kind) {
+  let seen = [];
+  try { seen = JSON.parse(store.get(TIPS_KEY) || '[]'); } catch (e) { seen = []; }
+  if (seen.includes(kind)) return;
+  seen.push(kind); store.set(TIPS_KEY, JSON.stringify(seen));
+  const name = { bee: 'rule.bee.t', flag: 'rule.flag.t', seal: 'rule.seal.t' }[kind];
+  const tip = { bee: 'tipBee', flag: 'tipFlag', seal: 'tipSeal' }[kind];
+  if (name) banner(t(name), t(tip), 'fork', 4200);
+}
+function coveredHoles() {
+  let n = 0;
+  for (let x = 0; x < COLS; x++) { let seen = false; for (let y = 0; y < ROWS; y++) { if (S.board[y][x]) seen = true; else if (seen) n++; } }
+  return n;
+}
+let lastRc = RC_MAX;
+// nudge players toward the bee: when RC refills past the cost, and when there are covered gaps to fill
+function beeNudges() {
+  const ready = S.rc >= BEE_COST, crossed = ready && lastRc < BEE_COST;
+  lastRc = S.rc;
+  const pills = [$('#touch .t-bee'), el.beeBtn];
+  pills.forEach(b => b && b.classList.toggle('ready', ready && S.state === 'play'));
+  if (crossed && S.t - S.beeReadyShown > 20000) {
+    S.beeReadyShown = S.t;
+    pills.forEach(b => { if (!b) return; b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse'); });
+    toast(t(touchUI() ? 'beeReady' : 'beeReadyK'));
+  } else if (ready && !S.warm && S.t - S.holeHintAt > 45000 && Math.floor(S.t / 1000) !== Math.floor((S.t - 17) / 1000) && coveredHoles() >= 2) {
+    S.holeHintAt = S.t;
+    pills.forEach(b => { if (!b) return; b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse'); });
+    toast(t('holesHint'), 3200);
+  }
+}
 function hud() {
   setText(el.hive, fmt3(S.hive));
   setText(el.hbd, fmt3(S.hbd));
@@ -1869,6 +1953,15 @@ function hud() {
   setText(el.rcrate, t('rcRate', { n: S.era.id === 'rc' ? 2 : 4 }));
   setText(el.interest, t(S.era.id === 'rate' ? 'interestX2' : 'interest', { n: INTEREST_BLOCKS - (S.blocks % INTEREST_BLOCKS) }));
   el.beeBtn.disabled = S.state !== 'play' || S.rc < BEE_COST;
+  const toNext = 10 - (S.lines % 10);
+  setText($('#hfNext'), t('hfNext', { n: toNext, hf: S.hf + 1 }));
+  $('#hfbar').style.width = ((S.lines % 10) * 10) + '%';
+  const best = S.bestNow;
+  setText($('#bestLine'), best ? t('bestShort', { g: fmt3(best) }) : '');
+  if (S.state === 'play') {
+    beeNudges();
+    if (best > 0 && !S.pbShown && S.hive + S.hbd > best) { S.pbShown = true; banner(t('record'), t('pbD'), 'good', 2400); sfx('good'); }
+  }
   renderFeed();
 }
 function paintIcons() { paintIconsIn(el.sheet); }
@@ -1949,6 +2042,32 @@ function frame(now) {
 
 S = freshState();
 S.board = demoBoard();
+/* ---------- public game API (window.HBP) ----------
+   A small surface the optional net/ modules (multiplayer, Hive login) build on, so they never reach into game state.
+   Events: 'start' {seed}, 'lines' {n, sealed, combo, hf}, 'over' {total, lines, hf, seconds}. */
+const hbpListeners = {};
+function emit(type, data) { (hbpListeners[type] || []).forEach(fn => { try { fn(data); } catch (e) { /* a listener must never break the game */ } }); }
+window.HBP = {
+  version: () => VERSION.version,
+  on(type, fn) { (hbpListeners[type] = hbpListeners[type] || []).push(fn); return () => { hbpListeners[type] = hbpListeners[type].filter(f => f !== fn); }; },
+  start: (opts = {}) => { $('#playerName').value = opts.name || playerName; startGame({ seed: opts.seed }); },
+  isPlaying: () => S.state === 'play',
+  // incoming attack from an opponent: push n garbage rows from the bottom, each with one gap
+  receiveGarbage(n) {
+    if (S.state !== 'play') return;
+    for (let i = 0; i < Math.min(8, Math.max(0, n | 0)); i++) {
+      const over = S.board[0].some(Boolean), hole = Math.floor(S.rng() * COLS);
+      S.board.shift(); S.board.push(Array.from({ length: COLS }, (_, x) => (x === hole ? null : { t: 'G', k: null })));
+      resolveOverlap();
+      if (over) { gameOver(); return; }
+    }
+    if (!REDUCED) S.shake = 160;
+    sfx('bad');
+  },
+  // compact board for an opponent preview: 20 rows of 10 chars, '.' empty
+  snapshot: () => ({ seed: S.seed, lines: S.lines, hf: S.hf, total: S.hive + S.hbd, board: S.board.map(r => r.map(c => (c ? c.t : '.')).join('')).join('/') }),
+};
+
 /* ---------- version + changelog (English only; data lives in version.js) ---------- */
 const RELEASES = window.HBP_RELEASES || [{ version: '0.0.0', date: '', notes: [] }];
 const VERSION = RELEASES[0];
@@ -1975,7 +2094,7 @@ function updatePagerHints() {
 document.querySelectorAll('.home-tabs button').forEach(b => b.addEventListener('click', () => setHomeView(b.dataset.view)));
 renderVersion();
 // test hooks, only when the file is opened locally (never on the public site)
-if (location.protocol === 'file:') {
+if (location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(location.hostname)) {
   window.__hbpTest = {
     state: () => S, next: type => { S.queue.unshift(makeQ(type)); }, setHF: n => { S.hf = n; S.hfMax = Math.max(S.hfMax, n); },
     endWarm: () => { S.warm = false; }, gen: () => genPiece().type, music: () => ({ on: musicOn, playing: music.playing, bpm: musicBpm() }),
