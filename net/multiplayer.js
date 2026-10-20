@@ -57,6 +57,7 @@
     let snapTimer = 0, unsub = [];
     const send = (t, data = {}) => transport.send({ v: PROTOCOL, t, from: me, room, ...data });
     const roster = () => [...players.values()];
+    const report = name => { try { if (game.track) game.track(name); } catch (e) { /* analytics must never break a match */ } };
     const isHost = () => roster().map(p => p.id).sort()[0] === me; // lowest id hosts; a server may override
 
     transport.onMessage(msg => {
@@ -88,6 +89,7 @@
       }
     }
     function begin(seed) {
+      report('vs-start');
       players.forEach((q, id) => players.set(id, { ...q, over: false }));
       game.start({ seed, name });
       fire('start', seed);
@@ -96,12 +98,18 @@
     }
     function checkEnd() {
       const alive = roster().filter(q => !q.over);
-      if (alive.length <= 1) { clearInterval(snapTimer); fire('result', { winner: alive[0] ? alive[0].id : null, players: roster() }); }
+      if (alive.length <= 1) {
+        clearInterval(snapTimer);
+        const winner = alive[0] ? alive[0].id : null;
+        report(winner === me ? 'vs-win' : 'vs-lose');
+        fire('result', { winner, players: roster() });
+      }
     }
 
     unsub.push(game.on('lines', e => { const n = attackFor(e); if (n > 0) send('attack', { lines: n }); }));
     unsub.push(game.on('over', e => { players.set(me, { ...players.get(me), over: true, result: e }); send('over', e); checkEnd(); }));
     // the session token only ever goes to a server, which swaps it for a verified Hive name; never to peers
+    report('vs-join');
     send('hello', { name, version: game.version(), hive, ...(transport instanceof WebSocketTransport && token ? { token } : {}) });
 
     return {

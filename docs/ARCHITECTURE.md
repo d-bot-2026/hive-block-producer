@@ -25,6 +25,8 @@ The modules never touch game internals. They use this surface:
 - `HBP.receiveGarbage(n)`: push n garbage rows from an opponent.
 - `HBP.snapshot()`: `{seed, lines, hf, total, board}` where `board` is 20 rows of 10 characters.
 - `HBP.isPlaying()`, `HBP.version()`.
+- `HBP.track(name)`: anonymous event count on the public site. Only `vs-join`, `vs-start`, `vs-win`, `vs-lose`,
+  `hive-login`, `hive-login-fail` and `hive-score-post` are accepted; the modules never send names or scores.
 
 ## Hive login (`net/hive-auth.js` + `server/hive-verify.js`)
 

@@ -4,6 +4,15 @@
    Versioning: vMAJOR.MINOR.PATCH. New features bump MINOR, bug fixes bump PATCH; v1.0.0 marks the end of beta. */
 window.HBP_RELEASES = [
   {
+    version: '0.10.0',
+    date: '2026-10-20',
+    notes: [
+      'Phone controls rearranged: the left thumb moves and drops (Left and Right side by side, the hard drop centered above them with a clear gap), the right thumb rotates (big clockwise, small counter-clockwise at its upper left, a slim soft drop below).',
+      'Every phone button now has a touch area of at least 44 by 44 pixels.',
+      'Visit counts now group game overs by lines cleared and are ready for versus and Hive login events.',
+    ],
+  },
+  {
     version: '0.9.0',
     date: '2026-10-20',
     notes: [

@@ -29,6 +29,8 @@
   };
   const changed = s => listeners.forEach(fn => { try { fn(s); } catch (e) { /* ignore */ } });
   const isValidName = name => NAME_RE.test(String(name || '').trim().toLowerCase());
+  // anonymous event counts through the game's analytics (event name only, never the account name)
+  const report = name => { try { if (window.HBP && window.HBP.track) window.HBP.track(name); } catch (e) { /* ignore */ } };
   const hasKeychain = () => typeof window !== 'undefined' && !!window.hive_keychain;
 
   function keychainSign(username, message) {
@@ -53,6 +55,9 @@
   }
 
   async function login(username, opts = {}) {
+    try { const session = await doLogin(username, opts); report('hive-login'); return session; } catch (e) { report('hive-login-fail'); throw e; }
+  }
+  async function doLogin(username, opts) {
     const name = String(username || '').trim().toLowerCase().replace(/^@/, '');
     if (!isValidName(name)) throw new Error('invalid-name');
     const method = opts.method || 'keychain';
@@ -90,6 +95,7 @@
         seconds: stats.seconds | 0, seed: stats.seed >>> 0,
       };
       window.hive_keychain.requestCustomJson(s.username, APP_ID, 'Posting', JSON.stringify(payload), 'Hive Block Producer score', res => {
+        if (res && res.success) report('hive-score-post');
         if (res && res.success) resolve({ txId: res.result && (res.result.id || res.result.tx_id), payload });
         else reject(new Error((res && (res.error || res.message)) || 'broadcast-rejected'));
       });

@@ -5,6 +5,12 @@ Versions follow vMAJOR.MINOR.PATCH: new features bump MINOR, bug fixes bump PATC
 
 <!-- Generated from version.js by scripts/changelog.js. Edit version.js, not this file. -->
 
+## v0.10.0 (2026-10-20)
+
+- Phone controls rearranged: the left thumb moves and drops (Left and Right side by side, the hard drop centered above them with a clear gap), the right thumb rotates (big clockwise, small counter-clockwise at its upper left, a slim soft drop below).
+- Every phone button now has a touch area of at least 44 by 44 pixels.
+- Visit counts now group game overs by lines cleared and are ready for versus and Hive login events.
+
 ## v0.9.0 (2026-10-20)
 
 - Consensus Seal reworked: when it lands it is used up and clears the top three rows of your stack, wherever you put it.
