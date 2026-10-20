@@ -4,6 +4,15 @@
    Versioning: vMAJOR.MINOR.PATCH. New features bump MINOR, bug fixes bump PATCH; v1.0.0 marks the end of beta. */
 window.HBP_RELEASES = [
   {
+    version: '0.11.0',
+    date: '2026-10-20',
+    notes: [
+      'Phone controls redesigned as one symmetric deck: two thumb clusters of the same size, set in from the edges.',
+      'Left thumb: a wide hard-drop bar above two big Left and Right keys. Right thumb: a big clockwise rotate, with counter-clockwise above and soft drop below on the inner side.',
+      'Spare screen height now goes to bigger keys instead of an empty band under the board.',
+    ],
+  },
+  {
     version: '0.10.0',
     date: '2026-10-20',
     notes: [

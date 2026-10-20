@@ -5,6 +5,12 @@ Versions follow vMAJOR.MINOR.PATCH: new features bump MINOR, bug fixes bump PATC
 
 <!-- Generated from version.js by scripts/changelog.js. Edit version.js, not this file. -->
 
+## v0.11.0 (2026-10-20)
+
+- Phone controls redesigned as one symmetric deck: two thumb clusters of the same size, set in from the edges.
+- Left thumb: a wide hard-drop bar above two big Left and Right keys. Right thumb: a big clockwise rotate, with counter-clockwise above and soft drop below on the inner side.
+- Spare screen height now goes to bigger keys instead of an empty band under the board.
+
 ## v0.10.0 (2026-10-20)
 
 - Phone controls rearranged: the left thumb moves and drops (Left and Right side by side, the hard drop centered above them with a clear gap), the right thumb rotates (big clockwise, small counter-clockwise at its upper left, a slim soft drop below).
