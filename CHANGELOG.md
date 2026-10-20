@@ -5,7 +5,7 @@ Versions follow vMAJOR.MINOR.PATCH: new features bump MINOR, bug fixes bump PATC
 
 <!-- Generated from version.js by scripts/changelog.js. Edit version.js, not this file. -->
 
-## v0.8.0 (2026-10-14)
+## v0.8.0 (2026-10-20)
 
 - Phone controls rebuilt for the thumbs: a big clockwise rotate in the middle of a left-hand cross (move beside it, soft drop below, small counter-clockwise above), and only the hard drop on the right.
 - Clearer specials: the flag bomb now clears its whole column, the Consensus Seal shows x/10 counters on every row it would touch, each special explains itself the first time, and the bee button lights up when you can afford one.
