@@ -4,6 +4,15 @@
    Versioning: vMAJOR.MINOR.PATCH. New features bump MINOR, bug fixes bump PATCH; v1.0.0 marks the end of beta. */
 window.HBP_RELEASES = [
   {
+    version: '0.9.0',
+    date: '2026-10-20',
+    notes: [
+      'Consensus Seal reworked: when it lands it is used up and clears the top three rows of your stack, wherever you put it.',
+      'Stronger flag bomb: it blasts the 3×3 area where it lands and clears those three columns all the way to the top.',
+      'Records now show the game version of each run.',
+    ],
+  },
+  {
     version: '0.8.0',
     date: '2026-10-20',
     notes: [

@@ -463,6 +463,7 @@ kbd {
 .records th.n { white-space: nowrap; }
 .records td.who { max-width: 0; width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .records tr.latest td { color: var(--honey); }
+.records td.ver { color: var(--muted); font-size: 11.5px; }
 .records-wrap { overflow-x: auto; }
 
 /* language menu */
@@ -961,9 +962,8 @@ function makeQ(type) {
   }
   return { type, base: m };
 }
-// Consensus Seal: rare H piece; rows it touches that are at least SEAL_FILL full get filled and cleared
-const SEAL_MIN_HF = 26, SEAL_CHANCE = 0.02, SEAL_FILL = 0.7, SEAL_BONUS = 150;
-const SEAL_MIN = Math.ceil(COLS * SEAL_FILL);
+// Consensus Seal: rare H piece; when it lands, the top SEAL_ROWS rows of the stack are cleared completely
+const SEAL_MIN_HF = 26, SEAL_CHANCE = 0.02, SEAL_ROWS = 3, SEAL_BONUS = 100;
 function genPiece() {
   S.pieceCount++;
   if (S.era.id === 'bee' && S.pieceCount % 7 === 0) return makeQ('B');
@@ -1115,20 +1115,24 @@ function lockPiece() {
     floatText(t('fFill'), p.x + 0.5, ty + 0.2, '#ffc93c');
     sfx('bee');
   } else if (p.special === 'flag') {
-    // the flag clears its whole column, top to bottom, so it never leaves floating blocks or new holes
+    // the flag blasts the 3x3 around where it lands and clears those three columns all the way to the top,
+    // so nothing is left hanging over the crater
     let n = 0, coins = 0;
-    for (let y = 0; y < ROWS; y++) {
-      const cell = S.board[y][p.x];
+    const yBottom = Math.min(ROWS - 1, p.y + 1);
+    for (let x = Math.max(0, p.x - 1); x <= Math.min(COLS - 1, p.x + 1); x++) for (let y = 0; y <= yBottom; y++) {
+      const cell = S.board[y][x];
       if (!cell) continue;
       if (cell.k === 'coin') coins++;
-      S.board[y][p.x] = null; n++;
-      burst(p.x + 0.5, y + 0.5, y % 2 ? '#ff5d73' : '#f5a524', 3, 6);
+      S.board[y][x] = null; n++;
+      burst(x + 0.5, y + 0.5, (x + y) % 2 ? '#ff5d73' : '#f5a524', 3, 6);
     }
     addHive((n * 30 + coins * 50) * mult());
     burst(p.x + 0.5, p.y + 0.5, '#ff5d73', 18, 9);
     floatText(n ? t('fFlag', { n }) : t('fFlagMiss'), p.x + 0.5, p.y, '#ff5d73');
     if (!REDUCED) S.shake = 260;
     sfx('boom');
+  } else if (p.special === 'seal' && sealRows().length) {
+    applySeal(p);
   } else {
     let out = false;
     for (const [x, y, v] of cellsOf(p)) {
@@ -1136,7 +1140,7 @@ function lockPiece() {
       S.board[y][x] = { t: p.type, k: v === 2 ? 'coin' : v === 3 ? 'hbd' : null };
     }
     if (out) { gameOver(); return; }
-    if (p.special === 'seal') applySeal(p); else sfx('lock');
+    sfx('lock');
   }
   S.canHold = true;
   S.placed++;
@@ -1144,23 +1148,24 @@ function lockPiece() {
   checkLines(true);
 }
 
-function sealRows(p) {
-  const rows = [...new Set(cellsOf(p).map(c => c[1]))].filter(y => y >= 0 && y < ROWS);
-  return rows.filter(y => {
-    const pieceHere = cellsOf(p).filter(c => c[1] === y && !S.board[y][c[0]]).length;
-    return S.board[y].filter(Boolean).length + pieceHere >= SEAL_MIN;
-  });
+// the rows a seal clears: the highest SEAL_ROWS rows of the stack that is already there (the seal itself is used up)
+function sealRows() {
+  const top = S.board.findIndex(r => r.some(Boolean));
+  if (top < 0) return [];
+  const rows = [];
+  for (let y = top; y < ROWS && rows.length < SEAL_ROWS; y++) rows.push(y);
+  return rows;
 }
 function applySeal(p) {
-  const sealed = sealRows(p); // the piece is already on the board here
-  if (!sealed.length) { floatText(t('sealNone'), p.x + 1.5, p.y + 1, PIECES.H.color); sfx('lock'); return; }
+  const sealed = sealRows();
+  for (const [x, y] of cellsOf(p)) if (y >= 0) burst(x + 0.5, y + 0.5, '#efe9ff', 4, 6);
   for (const y of sealed) for (let x = 0; x < COLS; x++) {
     if (!S.board[y][x]) S.board[y][x] = { t: 'H', k: null };
     burst(x + 0.5, y + 0.5, x % 2 ? '#f5a524' : '#efe9ff', 3, 5);
   }
   const g = SEAL_BONUS * sealed.length * mult();
   addHive(g);
-  floatText(t('rule.seal.t'), COLS / 2, sealed[0] - 1.2, '#efe9ff');
+  floatText(t('rule.seal.t'), COLS / 2, Math.max(1, sealed[0] - 1.2), '#efe9ff');
   banner(t('rule.seal.t'), t('sealD', { n: sealed.length, g: fmt3(g) }), 'fork');
   log('sealLog', { n: sealed.length }, 'good');
   if (!REDUCED) S.shake = 200;
@@ -1534,12 +1539,12 @@ function gameOver() {
   sfx('over');
   endCoach();
   emit('over', { total: S.hive + S.hbd, lines: S.lines, hf: S.hfMax, seconds: Math.round(S.t / 1000) });
-  track('game-over', `Game over: ${S.lines} lines, ${S.placed} pieces, ${Math.round(S.t / 1000)}s, HF${S.hfMax}`);
+  track('game-over', `Game over: ${S.lines} lines, ${S.placed} pieces, ${Math.round(S.t / 1000)}s, HF${S.hfMax}, v${VERSION.version}`);
   const total = S.hive + S.hbd;
   const best = bestTotal();
   const record = total > best;
   lastRunId = Date.now();
-  saveRun({ id: lastRunId, n: playerName, g: 1, t: total, l: S.lines, h: S.hfMax, d: lastRunId });
+  saveRun({ id: lastRunId, n: playerName, g: 1, t: total, l: S.lines, h: S.hfMax, d: lastRunId, v: VERSION.version });
   if (record) store.set('hive-tetris-best', String(total));
   const g = S;
   setTimeout(() => { if (S === g && S.state === 'over') showSheet(() => `
@@ -1605,8 +1610,8 @@ function renderHome() {
   else {
     let df;
     try { df = new Intl.DateTimeFormat(lang, { month: 'short', day: 'numeric' }); } catch (e) { df = null; }
-    $('#records').innerHTML = `<table class="records"><thead><tr><th>${t('colName')}</th><th class="n">${t('colScore')}</th><th class="n">${t('colLines')}</th><th class="n">${t('colHf')}</th><th class="n">${t('colDate')}</th></tr></thead><tbody>${
-      runs.map(r => `<tr class="${r.id === lastRunId ? 'latest' : ''}"><td class="who">${escapeHtml(r.n || t('defaultName'))}</td><td class="n">${fmt3(r.t)}</td><td class="n">${r.l}</td><td class="n">${r.h}</td><td class="n">${df ? df.format(new Date(r.d)) : ''}</td></tr>`).join('')
+    $('#records').innerHTML = `<table class="records"><thead><tr><th>${t('colName')}</th><th class="n">${t('colScore')}</th><th class="n">${t('colLines')}</th><th class="n">${t('colHf')}</th><th class="n">${t('colDate')}</th><th class="n">${t('colVer')}</th></tr></thead><tbody>${
+      runs.map(r => `<tr class="${r.id === lastRunId ? 'latest' : ''}"><td class="who">${escapeHtml(r.n || t('defaultName'))}</td><td class="n">${fmt3(r.t)}</td><td class="n">${r.l}</td><td class="n">${r.h}</td><td class="n">${df ? df.format(new Date(r.d)) : ''}</td><td class="n ver">${r.v ? escapeHtml(r.v) : '—'}</td></tr>`).join('')
     }</tbody></table>`;
   }
   paintIconsIn($('#homeRules'));
@@ -1837,22 +1842,15 @@ function render() {
     } else {
       const gy = ghostY(p);
       if (p.special === 'flag') {
-        c.save(); c.fillStyle = 'rgba(255,93,115,0.10)'; c.fillRect(p.x * cs, 0, cs, H);
-        c.strokeStyle = 'rgba(255,93,115,0.6)'; c.setLineDash([4, 4]); c.lineWidth = 2;
-        c.strokeRect(p.x * cs + 1, 1, cs - 2, H - 2); c.restore();
+        const x0 = Math.max(0, p.x - 1), x1 = Math.min(COLS - 1, p.x + 1), hh = (Math.min(ROWS - 1, gy + 1) + 1) * cs;
+        c.save(); c.fillStyle = 'rgba(255,93,115,0.12)'; c.fillRect(x0 * cs, 0, (x1 - x0 + 1) * cs, hh);
+        c.strokeStyle = 'rgba(255,93,115,0.65)'; c.setLineDash([4, 4]); c.lineWidth = 2;
+        c.strokeRect(x0 * cs + 1, 1, (x1 - x0 + 1) * cs - 2, hh - 2); c.restore();
       }
       if (p.special === 'seal') {
         c.save(); c.fillStyle = 'rgba(245,165,36,0.13)'; c.strokeStyle = 'rgba(245,165,36,0.65)'; c.setLineDash([4, 4]); c.lineWidth = 1.5;
-        const gp = { ...p, y: gy }, ok = sealRows(gp);
-        for (const y of ok) { c.fillRect(0, y * cs, W, cs); c.strokeRect(1, y * cs + 1, W - 2, cs - 2); }
-        c.setLineDash([]); c.textAlign = 'right'; c.textBaseline = 'middle';
-        c.font = `800 ${Math.round(cs * 0.46)}px ${'JetBrains Mono'}, monospace`;
-        for (const y of [...new Set(cellsOf(gp).map(q => q[1]))].filter(y => y >= 0)) {
-          const n = S.board[y].filter(Boolean).length + cellsOf(gp).filter(q => q[1] === y && !S.board[y][q[0]]).length;
-          const label = `${n}/${COLS}`, x = W - 3, yy = y * cs + cs / 2;
-          c.lineWidth = 3; c.strokeStyle = 'rgba(18,7,12,0.9)'; c.strokeText(label, x, yy);
-          c.fillStyle = n >= SEAL_MIN ? '#f5a524' : '#b39aa4'; c.fillText(label, x, yy);
-        }
+        const ok = sealRows();
+        if (ok.length) { const y0 = ok[0] * cs, hh = ok.length * cs; c.fillRect(0, y0, W, hh); c.strokeRect(1, y0 + 1, W - 2, hh - 2); }
         c.restore();
       }
       if (gy !== p.y) for (const [x, y] of cellsOf({ ...p, y: gy })) if (y >= 0) drawOutline(c, x * cs, y * cs, cs, p.special === 'flag' ? '#ff5d73' : color);

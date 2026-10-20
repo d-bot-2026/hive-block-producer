@@ -5,6 +5,12 @@ Versions follow vMAJOR.MINOR.PATCH: new features bump MINOR, bug fixes bump PATC
 
 <!-- Generated from version.js by scripts/changelog.js. Edit version.js, not this file. -->
 
+## v0.9.0 (2026-10-20)
+
+- Consensus Seal reworked: when it lands it is used up and clears the top three rows of your stack, wherever you put it.
+- Stronger flag bomb: it blasts the 3×3 area where it lands and clears those three columns all the way to the top.
+- Records now show the game version of each run.
+
 ## v0.8.0 (2026-10-20)
 
 - Phone controls rebuilt for the thumbs: a big clockwise rotate in the middle of a left-hand cross (move beside it, soft drop below, small counter-clockwise above), and only the hard drop on the right.
