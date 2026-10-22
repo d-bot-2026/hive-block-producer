@@ -787,8 +787,18 @@ const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } },
 };
+// v0.11.1 renamed saved keys from 'hive-tetris-*' to 'hbp-*'; carry existing players' settings and records over once
+(function migrateKeys() {
+  try {
+    ['lang', 'name', 'runs', 'best', 'tips', 'muted', 'music', 'cleared'].forEach(k => {
+      const old = 'hive-tetris-' + k, cur = 'hbp-' + k, v = localStorage.getItem(old);
+      if (v !== null && localStorage.getItem(cur) === null) localStorage.setItem(cur, v);
+      if (v !== null) localStorage.removeItem(old);
+    });
+  } catch (e) { /* storage unavailable */ }
+})();
 function detectLang() {
-  const saved = store.get('hive-tetris-lang');
+  const saved = store.get('hbp-lang');
   if (saved === 'zh') return 'zh-Hant';
   if (CODES.includes(saved)) return saved;
   // first-time visitors always start in English; their own choice is remembered afterwards
@@ -821,7 +831,7 @@ function rotateM(m, dir) {
 function topRow(m) { for (let y = 0; y < m.length; y++) if (m[y].some(v => v)) return y; return 0; }
 
 /* ---------- audio ---------- */
-let actx = null, muted = store.get('hive-tetris-muted') === '1';
+let actx = null, muted = store.get('hbp-muted') === '1';
 function initAudio() {
   if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
   try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; }
@@ -855,7 +865,7 @@ function sfx(name) {
 }
 /* ---------- background music: an original 8-bit loop, synthesized live (no audio files) ----------
    16 bars of eighth notes in C major. Melody tokens: a note name starts a note, '-' holds it, '.' is a rest. */
-const MUSIC_KEY = 'hive-tetris-music';
+const MUSIC_KEY = 'hbp-music';
 let musicOn = store.get(MUSIC_KEY) !== '0';
 const MUSIC_BASE_BPM = 112, MUSIC_BPM_STEP = 5, MUSIC_MAX_BPM = 150, MUSIC_VOL = 0.3;
 const SONG = [
@@ -947,7 +957,7 @@ function toggleMusic() {
   updateButtons(); musicSync();
 }
 function toggleMute() {
-  muted = !muted; store.set('hive-tetris-muted', muted ? '1' : '0');
+  muted = !muted; store.set('hbp-muted', muted ? '1' : '0');
   updateButtons();
   if (!muted) initAudio();
 }
@@ -967,7 +977,7 @@ function freshState() {
 const lvl = () => (S.hf - 24) + (S.era.id === 'fast' ? 2 : 0);
 const mult = () => S.hf - 23;
 // new players get a slow warm-up until their first clear (or WARM_PIECES pieces), so a first row is reachable on a phone
-const WARM_MS = 1300, WARM_LOCK_MS = 800, WARM_PIECES = 14, CLEARED_KEY = 'hive-tetris-cleared';
+const WARM_MS = 1300, WARM_LOCK_MS = 800, WARM_PIECES = 14, CLEARED_KEY = 'hbp-cleared';
 const gravityMs = () => { const g = Math.max(55, Math.round(850 * Math.pow(0.8, lvl()))); return S.warm ? Math.max(g, WARM_MS) : g; };
 
 function makeQ(type) {
@@ -1219,8 +1229,8 @@ function checkLines(fromLock) {
   if (coins) floatText(t('fTokens', { n: coins }), COLS / 2, midY + 1.1, '#ff8da0');
   if (hbds) floatText(`+${fmt3(hbds * 500)} HBD`, COLS / 2, midY + (coins ? 2.2 : 1.1), '#2ec4b6');
   if (n >= 4) {
-    banner(t('tetrisT'), t('tetrisD', { g: fmt3(gain) }), 'good');
-    log('tetrisLog', { who: pick(ACCTS) }, 'good');
+    banner(t('whaleT'), t('whaleD', { g: fmt3(gain) }), 'good');
+    log('whaleLog', { who: pick(ACCTS) }, 'good');
     if (!REDUCED) S.shake = 220;
     sfx('big');
   } else {
@@ -1445,7 +1455,7 @@ function setLang(code) {
   if (!CODES.includes(code)) return;
   if (code !== lang) track('lang-' + code, 'Language: ' + code);
   lang = code;
-  store.set('hive-tetris-lang', lang);
+  store.set('hbp-lang', lang);
   applyStatic();
 }
 let langReturn = null, langOpen = false;
@@ -1482,7 +1492,7 @@ function handleHeld(dt) {
 /* ---------- game flow ---------- */
 let sheetFn = null;
 // storage keys keep the original prefix so existing records survive the rename
-const NAME_KEY = 'hive-tetris-name', RUNS_KEY = 'hive-tetris-runs';
+const NAME_KEY = 'hbp-name', RUNS_KEY = 'hbp-runs';
 let playerName = (store.get(NAME_KEY) || '').slice(0, 16);
 function cleanName(v) { return String(v || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16); }
 function displayName() { return playerName || t('defaultName'); }
@@ -1496,7 +1506,7 @@ function saveRun(run) {
 }
 function bestTotal() {
   const runs = loadRuns();
-  return Math.max(runs.length ? runs[0].t : 0, parseInt(store.get('hive-tetris-best') || '0', 10) || 0);
+  return Math.max(runs.length ? runs[0].t : 0, parseInt(store.get('hbp-best') || '0', 10) || 0);
 }
 let lastRunId = 0;
 function startGame(opts = {}) {
@@ -1567,7 +1577,7 @@ function gameOver() {
   const record = total > best;
   lastRunId = Date.now();
   saveRun({ id: lastRunId, n: playerName, g: 1, t: total, l: S.lines, h: S.hfMax, d: lastRunId, v: VERSION.version });
-  if (record) store.set('hive-tetris-best', String(total));
+  if (record) store.set('hbp-best', String(total));
   const g = S;
   setTimeout(() => { if (S === g && S.state === 'over') showSheet(() => `
     <h2>${t('overT')}</h2>
@@ -1933,7 +1943,7 @@ function toast(text, ms = 2600) {
   const el2 = $('#toast'); el2.textContent = text; el2.hidden = false;
   clearTimeout(toastTimer); toastTimer = setTimeout(() => { el2.hidden = true; }, ms);
 }
-const TIPS_KEY = 'hive-tetris-tips';
+const TIPS_KEY = 'hbp-tips';
 // explain each special piece once per device, the first time it is actually in your hands
 function tipOnce(kind) {
   let seen = [];

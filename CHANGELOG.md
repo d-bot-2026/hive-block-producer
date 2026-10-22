@@ -5,6 +5,10 @@ Versions follow vMAJOR.MINOR.PATCH: new features bump MINOR, bug fixes bump PATC
 
 <!-- Generated from version.js by scripts/changelog.js. Edit version.js, not this file. -->
 
+## v0.11.1 (2026-10-22)
+
+- Internal clean-up: saved settings and records use new storage names. Existing records, names and sound settings carry over automatically.
+
 ## v0.11.0 (2026-10-20)
 
 - Phone controls redesigned as one symmetric deck: two thumb clusters of the same size, set in from the edges.

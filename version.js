@@ -4,6 +4,13 @@
    Versioning: vMAJOR.MINOR.PATCH. New features bump MINOR, bug fixes bump PATCH; v1.0.0 marks the end of beta. */
 window.HBP_RELEASES = [
   {
+    version: '0.11.1',
+    date: '2026-10-22',
+    notes: [
+      'Internal clean-up: saved settings and records use new storage names. Existing records, names and sound settings carry over automatically.',
+    ],
+  },
+  {
     version: '0.11.0',
     date: '2026-10-20',
     notes: [
