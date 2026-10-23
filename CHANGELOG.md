@@ -5,6 +5,11 @@ Versions follow vMAJOR.MINOR.PATCH: new features bump MINOR, bug fixes bump PATC
 
 <!-- Generated from version.js by scripts/changelog.js. Edit version.js, not this file. -->
 
+## v0.12.0 (2026-10-23)
+
+- Honeycomb mode prototype at honeycomb.html: hexagon pieces fall straight down a honeycomb board, zigzag rows clear, and pieces turn in 60° steps.
+- Seven new 4-cell hexagon pieces, hold, next preview and the same thumb controls as the classic game. Tokens, bees and specials come later.
+
 ## v0.11.1 (2026-10-22)
 
 - Internal clean-up: saved settings and records use new storage names. Existing records, names and sound settings carry over automatically.

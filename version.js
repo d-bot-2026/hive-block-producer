@@ -4,6 +4,14 @@
    Versioning: vMAJOR.MINOR.PATCH. New features bump MINOR, bug fixes bump PATCH; v1.0.0 marks the end of beta. */
 window.HBP_RELEASES = [
   {
+    version: '0.12.0',
+    date: '2026-10-23',
+    notes: [
+      'Honeycomb mode prototype at honeycomb.html: hexagon pieces fall straight down a honeycomb board, zigzag rows clear, and pieces turn in 60° steps.',
+      'Seven new 4-cell hexagon pieces, hold, next preview and the same thumb controls as the classic game. Tokens, bees and specials come later.',
+    ],
+  },
+  {
     version: '0.11.1',
     date: '2026-10-22',
     notes: [

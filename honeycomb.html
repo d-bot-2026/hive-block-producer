@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Honeycomb mode (prototype) | Hive Block Producer</title>
+<meta name="description" content="Prototype of a honeycomb mode for Hive Block Producer: hexagon pieces fall straight down a hex board and zigzag rows clear.">
+<!-- prototype: keep it out of search results until it becomes a real mode -->
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#170a10">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 115'%3E%3Cpath d='M50 0l50 29v57l-50 29L0 86V29z' fill='%23f5a524'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Honeycomb prototype. Same palette and touch deck as the classic game (index.html), one screen, no page scroll.
+   Phones: info bar on top, board, then the thumb deck. Desktop: board with an info rail on the right. */
+:root {
+  --bg: #170a10; --bg-deep: #10060b; --panel: #231420; --line: #3e2532;
+  --fg: #f6ecef; --muted: #b39aa4; --hive: #e31337; --honey: #f5a524; --hbd: #2ec4b6;
+  --move: #9cc0ff; --move-bg: #1d1f33; --move-line: #3f4a78;
+  --f-body: "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-display: "Oxanium", var(--f-body);
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+:root:lang(zh-Hant) { --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif; }
+:root:lang(zh-Hans) { --f-body: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+:root:lang(ja) { --f-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif; }
+:root:lang(ko) { --f-body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+:root:lang(hi) { --f-body: "Noto Sans Devanagari", "Nirmala UI", system-ui, sans-serif; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  background: radial-gradient(ellipse at 50% 30%, #2a0f1a 0%, var(--bg) 60%); color: var(--fg);
+  font: 15px/1.45 var(--f-body); -webkit-tap-highlight-color: transparent; overscroll-behavior: none;
+}
+button { font: inherit; color: inherit; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--honey); outline-offset: 2px; }
+.app {
+  height: 100%; max-width: 980px; margin: 0 auto; display: grid;
+  grid-template-columns: 190px auto 250px; grid-template-rows: auto 1fr; gap: 14px 22px; justify-content: center; align-content: start;
+  padding: max(14px, env(safe-area-inset-top, 0px)) 16px max(10px, env(safe-area-inset-bottom, 0px));
+}
+.top { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; min-width: 0; }
+.top a { color: var(--muted); text-decoration: none; font-size: 13px; border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; white-space: nowrap; }
+.top h1 { margin: 0; font: 800 20px/1 var(--f-display); letter-spacing: 0.06em; color: var(--honey); white-space: nowrap; }
+.top .proto { font: 600 10px/1 var(--f-display); letter-spacing: 0.14em; color: var(--muted); border: 1px dashed var(--line); border-radius: 6px; padding: 4px 6px; white-space: nowrap; }
+.board-wrap { position: relative; justify-self: center; }
+#board { display: block; touch-action: none; }
+.side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
+.box h3 { margin: 0 0 6px; font: 600 11px/1 var(--f-display); letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; }
+.stats { display: grid; gap: 10px; margin: 0; }
+.stats dt { font-size: 11px; color: var(--muted); }
+.stats dd { margin: 2px 0 0; font: 700 20px/1.1 var(--f-mono); font-variant-numeric: tabular-nums; }
+.side canvas { display: block; margin: 0 auto; }
+.keys { font-size: 12px; color: var(--muted); line-height: 1.7; }
+kbd { font: 600 11px var(--f-mono); background: var(--bg-deep); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 5px; color: var(--fg); }
+.note { font-size: 12px; color: var(--muted); margin: 0; }
+
+/* touch deck: copied from the classic game's v0.11 layout so both modes feel the same in the hand */
+.touch {
+  --f: clamp(128px, calc((100vw - 32px - 24px - 28px) / 2), 184px);
+  --dh: 0px; --dp: 0px; --u: calc(var(--f) / 3);
+  display: none; grid-column: 1 / -1; width: 100%; max-width: 480px; justify-self: center; flex-direction: column; gap: 10px;
+}
+.touch button { touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; transition: transform 0.06s, filter 0.06s; }
+.touch button.is-down { transform: scale(0.93); filter: brightness(1.35); }
+.touch small { display: block; font: 600 10.5px/1.1 var(--f-body); letter-spacing: 0.02em; }
+.t-util { display: flex; gap: 6px; justify-content: center; }
+.t-pill { height: 44px; min-width: 44px; padding: 0 14px; border-radius: 99px; border: 1.5px solid var(--line); background: var(--panel); color: var(--fg); font: 700 12.5px/1 var(--f-body); display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+.t-pill.t-hold { border-color: var(--hbd); color: var(--hbd); }
+.t-pads {
+  display: flex; justify-content: space-between; align-items: stretch; gap: 24px; min-width: 0;
+  padding: 10px 14px calc(12px + var(--dp)); border-radius: 22px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(0, 0, 0, 0.18)); border: 1px solid var(--line);
+}
+.t-pads > div { width: var(--f); display: flex; flex-direction: column; }
+.t-label { display: block; margin-bottom: 8px; text-align: center; font: 600 10px/1 var(--f-display); letter-spacing: 0.16em; color: var(--muted); }
+.t-grid { display: grid; width: var(--f); height: calc(var(--f) + var(--dh)); }
+.t-key {
+  width: 100%; height: 100%; border-radius: 16px; border: 2px solid var(--move-line); background: var(--move-bg); color: var(--move);
+  font: 800 24px/1 var(--f-display); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 3px 0 var(--bg-deep);
+}
+.t-key small { color: var(--fg); opacity: 0.85; }
+.t-round { border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font: 800 26px/1 var(--f-display); box-shadow: 0 3px 0 var(--bg-deep); }
+.t-round small { max-width: 86%; text-align: center; line-height: 1.1; }
+.t-drop { background: var(--hive); border-color: #ff5a78; color: #fff; }
+.t-drop small { color: #fff; opacity: 1; }
+.t-cw { background: var(--honey); border: 2.5px solid #ffd27a; color: #2a1406; font-size: 38px; }
+.t-cw small { color: #2a1406; }
+.t-ccw { background: var(--bg-deep); border: 2px solid var(--honey); color: var(--honey); font-size: 22px; }
+.t-soft { font-size: 15px; flex-direction: row; gap: 6px; }
+.t-move .t-grid { grid-template-columns: 1fr 1fr; column-gap: 4px; grid-template-rows: minmax(44px, 0.95fr) minmax(16px, 0.42fr) minmax(44px, 1.63fr); grid-template-areas: "drop drop" ". ." "left right"; }
+.t-move .r-drop { grid-area: drop; border-radius: 99px; border: 3px solid #ff5a78; flex-direction: row; gap: 8px; font-size: 26px; }
+.t-key.k-left { grid-area: left; border-radius: 18px 6px 6px 18px; }
+.t-key.k-right { grid-area: right; border-radius: 6px 18px 18px 6px; }
+.t-rot .t-grid { grid-template-columns: 1fr auto; column-gap: 6px; grid-template-rows: 1fr 1fr; row-gap: 8px; grid-template-areas: "ccw cw" "soft cw"; }
+.t-rot .r-ccw { grid-area: ccw; justify-self: center; align-self: start; width: max(44px, calc(var(--u) * 1.05)); aspect-ratio: 1; }
+.t-rot .r-ccw small { display: none; }
+.t-rot .r-cw { grid-area: cw; align-self: center; justify-self: end; width: calc(var(--f) * 0.6); height: calc(var(--f) * 0.6); }
+.t-rot .k-soft { grid-area: soft; align-self: end; height: 44px; border-radius: 99px; font-size: 13px; }
+.t-rot .k-soft small { font-size: 10px; white-space: nowrap; }
+
+.overlay { position: fixed; inset: 0; z-index: 20; background: rgba(14, 5, 9, 0.72); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.sheet { width: 100%; max-width: 460px; max-height: 100%; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px 22px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); }
+.sheet h2 { margin: 0 0 8px; font: 800 28px/1.15 var(--f-display); color: var(--honey); }
+.sheet p { color: var(--muted); margin: 0 0 14px; }
+.sheet ul { color: var(--muted); margin: 0 0 16px; padding-left: 18px; font-size: 14px; }
+.result { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 6px 0 18px; }
+.result div { background: var(--bg-deep); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.result dt { font-size: 11px; color: var(--muted); }
+.result dd { margin: 2px 0 0; font: 700 18px/1.2 var(--f-mono); }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.primary { background: var(--hive); color: #fff; border: 0; border-radius: 10px; padding: 13px 26px; font: 700 16px/1 var(--f-display); letter-spacing: 0.06em; cursor: pointer; }
+.secondary { background: transparent; border: 1px solid var(--line); color: var(--fg); border-radius: 10px; padding: 12px 20px; cursor: pointer; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; }
+
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 8px; align-content: space-between; }
+  .top h1 { font-size: 17px; }
+  .side { gap: 8px; }
+  .side .keys-box, .side .note-box { display: none; }
+  .box { padding: 7px 8px; border-radius: 10px; }
+  .box h3 { font-size: 9.5px; letter-spacing: 0.08em; }
+  .stats { gap: 6px; }
+  .stats dt { font-size: 10px; }
+  .stats dd { font-size: 15px; overflow-wrap: anywhere; }
+  .touch { display: flex; }
+}
+@media (pointer: coarse) { .touch { display: flex; } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="top">
+    <a href="./" id="backLink">‹ <span data-hc="classic">Classic</span></a>
+    <h1 data-hc="title">Honeycomb</h1>
+    <span class="proto" data-hc="proto">PROTOTYPE</span>
+  </div>
+  <div class="side side-l">
+    <div class="box"><h3 data-i18n="hold">Hold</h3><canvas id="hold"></canvas></div>
+    <div class="box"><dl class="stats"><div><dt data-hc="score">Score</dt><dd id="score">0</dd></div></dl></div>
+  </div>
+  <div class="board-wrap"><canvas id="board" aria-label="Game board"></canvas></div>
+  <div class="side side-r">
+    <div class="box"><h3 data-hc="next">Next</h3><canvas id="next"></canvas></div>
+    <div class="box"><dl class="stats">
+      <div><dt data-i18n="lines">Lines</dt><dd id="lines">0</dd></div>
+      <div><dt data-hc="level">Level</dt><dd id="level">1</dd></div>
+    </dl></div>
+    <div class="box keys-box"><h3 data-i18n="controls">Controls</h3><div class="keys" id="keysHelp"></div></div>
+    <div class="box note-box"><p class="note" data-hc="protoNote"></p></div>
+  </div>
+
+  <div class="touch" id="touch">
+    <div class="t-util">
+      <button type="button" data-act="hold" class="t-pill t-hold" data-i18n="hold">Hold</button>
+      <button type="button" data-act="pause" class="t-pill" data-i18n="pause">Pause</button>
+    </div>
+    <div class="t-pads">
+      <div class="t-move" role="group">
+        <span class="t-label" data-i18n="padMove">MOVE · DROP</span>
+        <div class="t-grid">
+          <button type="button" data-act="drop" class="t-key t-drop r-drop">⤓<small data-i18n="hardDrop">Drop</small></button>
+          <button type="button" data-act="left" class="t-key k-left">◀<small data-i18n="left">Left</small></button>
+          <button type="button" data-act="right" class="t-key k-right">▶<small data-i18n="right">Right</small></button>
+        </div>
+      </div>
+      <div class="t-rot" role="group">
+        <span class="t-label" data-i18n="padRot">ROTATE</span>
+        <div class="t-grid">
+          <button type="button" data-act="rotateL" class="t-round t-ccw r-ccw">↺<small data-i18n="rotL">Rotate L</small></button>
+          <button type="button" data-act="rotate" class="t-round t-cw r-cw">↻<small data-i18n="rotR">Rotate R</small></button>
+          <button type="button" data-act="down" class="t-key t-soft k-soft">▼<small data-i18n="softDrop">Soft</small></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+
+<script src="i18n.js"></script>
+<script>
+'use strict';
+/* ---------- strings: shared ones come from i18n.js, the few prototype-only ones live here ---------- */
+const HC = {
+  en: { title: 'Honeycomb', proto: 'PROTOTYPE', classic: 'Classic', score: 'Score', level: 'Level', next: 'Next', best: 'Best',
+    intro: 'A first try at a hexagon mode. Pieces fall straight down like in the classic game, but the board is a honeycomb.',
+    r1: 'Fill a zigzag row from side to side to clear it.', r2: 'Pieces turn in 60° steps, six ways round.', r3: 'Moving one column shifts a piece half a cell up or down.',
+    protoNote: 'Prototype: no tokens, bees or specials yet. We are testing how moving, turning and clearing feel.',
+    play: 'Play', again: 'Play again', over: 'Game over', paused: 'Paused',
+    keys: '<kbd>←</kbd> <kbd>→</kbd> move · <kbd>↑</kbd>/<kbd>X</kbd> rotate · <kbd>Z</kbd> rotate back<br><kbd>↓</kbd> soft drop · <kbd>Space</kbd> drop · <kbd>C</kbd> hold · <kbd>P</kbd> pause' },
+  es: { title: 'Panal', proto: 'PROTOTIPO', classic: 'Clásico', score: 'Puntos', level: 'Nivel', next: 'Siguiente', best: 'Récord',
+    intro: 'Un primer intento de modo hexagonal. Las piezas caen en línea recta como en el clásico, pero el tablero es un panal.',
+    r1: 'Llena una fila en zigzag de lado a lado para borrarla.', r2: 'Las piezas giran de 60° en 60°, seis posiciones.', r3: 'Mover una columna sube o baja la pieza media celda.',
+    protoNote: 'Prototipo: aún sin tokens, abejas ni especiales. Probamos cómo se sienten mover, girar y borrar.',
+    play: 'Jugar', again: 'Otra vez', over: 'Fin de la partida', paused: 'En pausa',
+    keys: '<kbd>←</kbd> <kbd>→</kbd> mover · <kbd>↑</kbd>/<kbd>X</kbd> girar · <kbd>Z</kbd> girar al revés<br><kbd>↓</kbd> bajar · <kbd>Espacio</kbd> soltar · <kbd>C</kbd> guardar · <kbd>P</kbd> pausa' },
+  fr: { title: 'Alvéoles', proto: 'PROTOTYPE', classic: 'Classique', score: 'Score', level: 'Niveau', next: 'Suivant', best: 'Record',
+    intro: 'Un premier essai de mode hexagonal. Les pièces tombent tout droit comme dans le jeu classique, mais le plateau est une ruche.',
+    r1: 'Remplis une rangée en zigzag d’un bord à l’autre pour l’effacer.', r2: 'Les pièces tournent par pas de 60°, six positions.', r3: 'Changer de colonne décale la pièce d’une demi-case vers le haut ou le bas.',
+    protoNote: 'Prototype : pas encore de jetons, d’abeilles ni de pièces spéciales. On teste le déplacement, la rotation et les effacements.',
+    play: 'Jouer', again: 'Rejouer', over: 'Partie terminée', paused: 'En pause',
+    keys: '<kbd>←</kbd> <kbd>→</kbd> déplacer · <kbd>↑</kbd>/<kbd>X</kbd> tourner · <kbd>Z</kbd> tourner à l’envers<br><kbd>↓</kbd> descendre · <kbd>Espace</kbd> lâcher · <kbd>C</kbd> réserve · <kbd>P</kbd> pause' },
+  'zh-Hant': { title: '蜂巢模式', proto: '原型', classic: '經典模式', score: '分數', level: '等級', next: '下一個', best: '最佳',
+    intro: '六角形模式的第一版。方塊跟經典模式一樣直直落下，但盤面是蜂巢。',
+    r1: '把一條鋸齒列從左到右填滿就會消除。', r2: '方塊每次轉 60 度，共六個方向。', r3: '左右移一欄時，方塊會上下偏半格。',
+    protoNote: '原型：還沒有代幣、工蜂和特殊塊，先測試移動、旋轉和消除的手感。',
+    play: '開始', again: '再玩一次', over: '遊戲結束', paused: '暫停中',
+    keys: '<kbd>←</kbd> <kbd>→</kbd> 移動 · <kbd>↑</kbd>/<kbd>X</kbd> 旋轉 · <kbd>Z</kbd> 逆轉<br><kbd>↓</kbd> 軟降 · <kbd>Space</kbd> 硬降 · <kbd>C</kbd> 保留 · <kbd>P</kbd> 暫停' },
+  'zh-Hans': { title: '蜂巢模式', proto: '原型', classic: '经典模式', score: '分数', level: '等级', next: '下一个', best: '最佳',
+    intro: '六边形模式的第一版。方块跟经典模式一样直直落下，但盘面是蜂巢。',
+    r1: '把一条锯齿行从左到右填满就会消除。', r2: '方块每次转 60 度，共六个方向。', r3: '左右移一列时，方块会上下偏半格。',
+    protoNote: '原型：还没有代币、工蜂和特殊块，先测试移动、旋转和消除的手感。',
+    play: '开始', again: '再玩一次', over: '游戏结束', paused: '暂停中',
+    keys: '<kbd>←</kbd> <kbd>→</kbd> 移动 · <kbd>↑</kbd>/<kbd>X</kbd> 旋转 · <kbd>Z</kbd> 逆转<br><kbd>↓</kbd> 软降 · <kbd>Space</kbd> 硬降 · <kbd>C</kbd> 保留 · <kbd>P</kbd> 暂停' },
+  ja: { title: 'ハニカム', proto: '試作版', classic: 'クラシック', score: 'スコア', level: 'レベル', next: 'ネクスト', best: 'ベスト',
+    intro: '六角形モードの試作です。ピースはクラシックと同じくまっすぐ落ちますが、盤面はハチの巣です。',
+    r1: 'ジグザグの列を端から端まで埋めると消えます。', r2: 'ピースは 60° ずつ、6 方向に回ります。', r3: '1 列横に動かすと、ピースは半マス上下にずれます。',
+    protoNote: '試作版：トークン、ハチ、特殊ピースはまだありません。移動・回転・消去の手ざわりを確かめています。',
+    play: 'プレイ', again: 'もう一度', over: 'ゲームオーバー', paused: '一時停止中',
+    keys: '<kbd>←</kbd> <kbd>→</kbd> 移動 · <kbd>↑</kbd>/<kbd>X</kbd> 回転 · <kbd>Z</kbd> 逆回転<br><kbd>↓</kbd> ソフト · <kbd>Space</kbd> ハード · <kbd>C</kbd> ホールド · <kbd>P</kbd> 一時停止' },
+  ko: { title: '벌집 모드', proto: '프로토타입', classic: '클래식', score: '점수', level: '레벨', next: '다음', best: '최고',
+    intro: '육각형 모드의 첫 시도입니다. 조각은 클래식처럼 똑바로 떨어지지만 보드는 벌집입니다.',
+    r1: '지그재그 줄을 끝에서 끝까지 채우면 지워집니다.', r2: '조각은 60°씩, 여섯 방향으로 돕니다.', r3: '한 칸 옆으로 옮기면 조각이 반 칸 위나 아래로 어긋납니다.',
+    protoNote: '프로토타입: 아직 토큰, 벌, 특수 조각은 없습니다. 이동·회전·지우기 느낌을 시험하는 중입니다.',
+    play: '시작', again: '다시 하기', over: '게임 오버', paused: '일시정지',
+    keys: '<kbd>←</kbd> <kbd>→</kbd> 이동 · <kbd>↑</kbd>/<kbd>X</kbd> 회전 · <kbd>Z</kbd> 반대 회전<br><kbd>↓</kbd> 소프트 · <kbd>Space</kbd> 하드 · <kbd>C</kbd> 홀드 · <kbd>P</kbd> 일시정지' },
+  hi: { title: 'छत्ता मोड', proto: 'प्रोटोटाइप', classic: 'क्लासिक', score: 'अंक', level: 'स्तर', next: 'अगला', best: 'सर्वश्रेष्ठ',
+    intro: 'षट्भुज मोड का पहला प्रयास। टुकड़े क्लासिक की तरह सीधे गिरते हैं, पर बोर्ड मधुमक्खी का छत्ता है।',
+    r1: 'एक टेढ़ी-मेढ़ी पंक्ति को एक छोर से दूसरे छोर तक भरें, वह हट जाएगी।', r2: 'टुकड़े 60° के कदमों में, छह दिशाओं में घूमते हैं।', r3: 'एक कॉलम खिसकाने पर टुकड़ा आधा खाना ऊपर या नीचे होता है।',
+    protoNote: 'प्रोटोटाइप: अभी टोकन, मधुमक्खियाँ और खास टुकड़े नहीं हैं। हम खिसकाना, घुमाना और हटाना जाँच रहे हैं।',
+    play: 'खेलें', again: 'फिर खेलें', over: 'खेल खत्म', paused: 'रुका हुआ',
+    keys: '<kbd>←</kbd> <kbd>→</kbd> खिसकाएँ · <kbd>↑</kbd>/<kbd>X</kbd> घुमाएँ · <kbd>Z</kbd> उल्टा घुमाएँ<br><kbd>↓</kbd> धीरे · <kbd>Space</kbd> गिराएँ · <kbd>C</kbd> रखें · <kbd>P</kbd> रोकें' },
+};
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } },
+};
+const I18N = window.HT_I18N || {};
+const lang = HC[store.get('hbp-lang')] ? store.get('hbp-lang') : 'en'; // same language as the classic game, English by default
+const t = k => (HC[lang] && HC[lang][k]) || (I18N[lang] && I18N[lang][k]) || HC.en[k] || (I18N.en && I18N.en[k]) || k;
+document.documentElement.lang = lang;
+const LANG_FONT = ((window.HT_LANGS || []).find(l => l.code === lang) || {}).font || 'Noto+Sans';
+{ const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = `https://fonts.googleapis.com/css2?family=${LANG_FONT}:wght@400;600;700&display=swap`; document.head.append(link); }
+document.querySelectorAll('[data-hc]').forEach(e => { e.textContent = t(e.dataset.hc); });
+document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = t(e.dataset.i18n); });
+document.title = `${t('title')} (${t('proto').toLowerCase()}) | Hive Block Producer`;
+document.getElementById('keysHelp').innerHTML = t('keys');
+const $ = s => document.querySelector(s);
+
+/* ---------- hex geometry ----------
+   Flat-top hexagons in columns. Columns are straight, so pieces fall straight down.
+   Storage is offset "odd-q": board[row][col], odd columns sit half a cell lower than even ones.
+   Pieces are stored in axial coordinates (q, r), where (0, +1) is straight down, so they keep their shape anywhere. */
+const COLS = 11, ROWS = 18, S3 = Math.sqrt(3);
+const toAx = (c, r) => [c, r - ((c - (c & 1)) >> 1)];
+const toOff = (q, r) => [q, r + ((q - (q & 1)) >> 1)];
+const rotCW = ([q, r]) => [-r, q + r];
+const rotCCW = ([q, r]) => [q + r, -q];
+const D = [[1, 0], [1, -1], [0, -1], [-1, 0], [-1, 1], [0, 1]]; // axial neighbours
+
+// the seven 4-cell hexagon pieces; the second cell is the pivot, so turns stay centred
+const path = turns => { let p = [0, 0], d = 5; const out = [p]; for (const tn of turns) { d = (d + tn + 6) % 6; p = [p[0] + D[d][0], p[1] + D[d][1]]; out.push(p); } return out; };
+const center = (cells, i = 1) => cells.map(([q, r]) => [q - cells[i][0], r - cells[i][1]]);
+const PIECES = {
+  bar:   { cells: center(path([0, 0, 0])), color: '#2ec4b6' },
+  worm:  { cells: center(path([0, 0, 1])), color: '#6aa8ff' },
+  arch:  { cells: center(path([0, 1, 1])), color: '#a77bff' },
+  wave:  { cells: center(path([0, 1, -1])), color: '#ff8a5c' },
+  prop:  { cells: center([D[0], [0, 0], D[2], D[4]], 1), color: '#e31337' },
+  pistol:{ cells: center([[0, 0], D[5], D[0], [D[5][0] * 2, D[5][1] * 2]], 0), color: '#5fd38a' },
+  bee:   { cells: center([[0, 0], D[5], D[0], [D[5][0] + D[0][0], D[5][1] + D[0][1]]], 0), color: '#f5a524' },
+};
+const TYPES = Object.keys(PIECES);
+
+/* ---------- state ---------- */
+let S = null, cs = 16, mini = 9, dpr = 1;
+function newState() {
+  return {
+    board: Array.from({ length: ROWS }, () => Array(COLS).fill(null)),
+    bag: [], queue: [], cur: null, hold: null, holdUsed: false,
+    score: 0, lines: 0, level: 1, state: 'title', drop: 0, lockT: 0, lockResets: 0, t: 0, flash: [],
+  };
+}
+function nextType() {
+  if (!S.bag.length) { S.bag = TYPES.slice(); for (let i = S.bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [S.bag[i], S.bag[j]] = [S.bag[j], S.bag[i]]; } }
+  return S.bag.pop();
+}
+const cellsOf = p => { const [aq, ar] = toAx(p.c, p.r); return p.cells.map(([q, r]) => toOff(aq + q, ar + r)); };
+function fits(p) {
+  return cellsOf(p).every(([c, r]) => c >= 0 && c < COLS && r < ROWS && (r < 0 || !S.board[r][c]));
+}
+function spawn(type) {
+  const p = { type, cells: PIECES[type].cells.map(x => x.slice()), c: 5, r: 0 };
+  const top = Math.min(...cellsOf(p).map(([, r]) => r));
+  p.r -= top; // top cell on row 0
+  S.cur = p; S.lockT = 0; S.lockResets = 0; S.drop = 0;
+  if (!fits(p)) gameOver();
+}
+function spawnNext() { while (S.queue.length < 4) S.queue.push(nextType()); spawn(S.queue.shift()); S.queue.push(nextType()); S.holdUsed = false; }
+const gravityMs = () => Math.max(70, 800 * Math.pow(0.84, S.level - 1));
+
+function tryMove(dc, dr) {
+  const p = { ...S.cur, c: S.cur.c + dc, r: S.cur.r + dr };
+  if (!fits(p)) return false;
+  S.cur = p;
+  if (dc && S.lockResets < 15 && !fits({ ...p, r: p.r + 1 })) { S.lockT = 0; S.lockResets++; }
+  return true;
+}
+// turning: plain turn, then nudges sideways and up (the hex version of wall kicks)
+const KICKS = [[0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1], [-2, 0], [2, 0], [0, 1]];
+function rotate(dir) {
+  const cells = S.cur.cells.map(dir > 0 ? rotCW : rotCCW);
+  for (const [dc, dr] of KICKS) {
+    const p = { ...S.cur, cells, c: S.cur.c + dc, r: S.cur.r + dr };
+    if (fits(p)) { S.cur = p; if (S.lockResets < 15) { S.lockT = 0; S.lockResets++; } return true; }
+  }
+  return false;
+}
+function ghostRow() { let p = S.cur; while (fits({ ...p, r: p.r + 1 })) p = { ...p, r: p.r + 1 }; return p; }
+function hardDrop() { const g = ghostRow(); S.score += 2 * (g.r - S.cur.r); S.cur = g; lock(); }
+function lock() {
+  const color = PIECES[S.cur.type].color;
+  let above = false;
+  for (const [c, r] of cellsOf(S.cur)) { if (r < 0) above = true; else S.board[r][c] = color; }
+  S.cur = null;
+  if (above) { gameOver(); return; }
+  clearRows();
+  if (S.state === 'play') spawnNext();
+}
+// a row in odd-q storage is one zigzag line across the board; clearing it lets every column drop by one
+const LINE_SCORE = [0, 100, 300, 500, 800];
+function clearRows() {
+  const full = [];
+  for (let r = 0; r < ROWS; r++) if (S.board[r].every(Boolean)) full.push(r);
+  if (!full.length) return;
+  S.flash = full.map(r => ({ r, until: S.t + 220 }));
+  for (const r of full) { S.board.splice(r, 1); S.board.unshift(Array(COLS).fill(null)); }
+  S.lines += full.length;
+  S.score += (LINE_SCORE[Math.min(4, full.length)] || 1200) * S.level;
+  S.level = 1 + Math.floor(S.lines / 10);
+}
+function doHold() {
+  if (S.holdUsed) return;
+  const cur = S.cur.type;
+  if (S.hold) spawn(S.hold); else spawnNext();
+  S.hold = cur; S.holdUsed = true;
+}
+
+/* ---------- loop ---------- */
+const held = { dir: 0, t: 0, down: false };
+const DAS = 160, ARR = 45, SOFT = 35;
+function update(dt) {
+  S.t += dt;
+  if (held.dir) { held.t += dt; while (held.t >= DAS) { tryMove(held.dir, 0); held.t -= ARR; } }
+  const g = held.down ? Math.min(SOFT, gravityMs()) : gravityMs();
+  S.drop += dt;
+  while (S.drop >= g && S.cur) {
+    S.drop -= g;
+    if (tryMove(0, 1)) { if (held.down) S.score += 1; }
+    else break;
+  }
+  if (S.cur && !fits({ ...S.cur, r: S.cur.r + 1 })) { S.lockT += dt; if (S.lockT >= 500) lock(); }
+  else if (S.cur) S.lockT = 0;
+}
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(50, now - last); last = now;
+  if (S && S.state === 'play') update(dt);
+  render();
+  requestAnimationFrame(frame);
+}
+
+/* ---------- drawing ---------- */
+const boardCv = $('#board'), bx = boardCv.getContext('2d');
+const holdCv = $('#hold'), nextCv = $('#next');
+const hexXY = (c, r, s) => [s + c * 1.5 * s, (S3 / 2) * s + r * S3 * s + (c & 1 ? (S3 / 2) * s : 0)];
+function hexPath(ctx, x, y, s) { ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = Math.PI / 3 * i; ctx.lineTo(x + s * Math.cos(a), y + s * Math.sin(a)); } ctx.closePath(); }
+function drawCell(ctx, x, y, s, color, alpha = 1) {
+  ctx.globalAlpha = alpha;
+  hexPath(ctx, x, y, s * 0.93); ctx.fillStyle = color; ctx.fill();
+  hexPath(ctx, x, y - s * 0.08, s * 0.62); ctx.fillStyle = 'rgba(255,255,255,0.16)'; ctx.fill();
+  hexPath(ctx, x, y, s * 0.93); ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = Math.max(1, s * 0.07); ctx.stroke();
+  ctx.globalAlpha = 1;
+}
+function render() {
+  if (!S) return;
+  const s = cs, W = boardCv.width / dpr, H = boardCv.height / dpr;
+  bx.clearRect(0, 0, W, H);
+  for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
+    const [x, y] = hexXY(c, r, s);
+    hexPath(bx, x, y, s * 0.95); bx.fillStyle = '#12070c'; bx.fill(); bx.strokeStyle = '#2e1b25'; bx.lineWidth = 1; bx.stroke();
+    if (S.board[r][c]) drawCell(bx, x, y, s, S.board[r][c]);
+  }
+  if (S.cur) {
+    const g = ghostRow();
+    for (const [c, r] of cellsOf(g)) if (r >= 0) { const [x, y] = hexXY(c, r, s); hexPath(bx, x, y, s * 0.86); bx.strokeStyle = PIECES[S.cur.type].color; bx.globalAlpha = 0.6; bx.lineWidth = 2; bx.stroke(); bx.globalAlpha = 1; }
+    for (const [c, r] of cellsOf(S.cur)) if (r >= 0) { const [x, y] = hexXY(c, r, s); drawCell(bx, x, y, s, PIECES[S.cur.type].color); }
+  }
+  // brief glow on the zigzag rows that just cleared
+  S.flash = S.flash.filter(f => f.until > S.t);
+  for (const f of S.flash) { const a = (f.until - S.t) / 220; for (let c = 0; c < COLS; c++) { const [x, y] = hexXY(c, f.r, s); hexPath(bx, x, y, s * 0.95); bx.fillStyle = `rgba(255,210,74,${0.7 * a})`; bx.fill(); } }
+  drawMini(holdCv, S.hold ? [S.hold] : []);
+  drawMini(nextCv, S.queue.slice(0, 2));
+}
+function drawMini(cv, types) {
+  const ctx = cv.getContext('2d'), W = cv.width / dpr, H = cv.height / dpr;
+  ctx.clearRect(0, 0, W, H);
+  const slot = H / Math.max(1, cv === nextCv ? 2 : 1);
+  types.forEach((type, i) => {
+    const pts = PIECES[type].cells.map(([q, r]) => [mini * 1.5 * q, mini * S3 * (r + q / 2)]);
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    const ox = W / 2 - (Math.min(...xs) + Math.max(...xs)) / 2, oy = slot * i + slot / 2 - (Math.min(...ys) + Math.max(...ys)) / 2;
+    pts.forEach(([x, y]) => drawCell(ctx, ox + x, oy + y, mini, PIECES[type].color));
+  });
+}
+function sizeCanvas(cv, w, h) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.width = w + 'px'; cv.style.height = h + 'px'; cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); }
+function layout() {
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  const vw = Math.min(window.innerWidth, document.documentElement.clientWidth || Infinity);
+  const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  const mobile = vw <= 760;
+  const app = $('#app'), cs0 = getComputedStyle(app);
+  const padY = parseFloat(cs0.paddingTop) + parseFloat(cs0.paddingBottom), gap = parseFloat(cs0.rowGap) || 8;
+  const touch = $('#touch'); touch.style.setProperty('--dh', '0px'); touch.style.setProperty('--dp', '0px');
+  const touchH = getComputedStyle(touch).display !== 'none' ? touch.offsetHeight + gap : 0;
+  const topH = $('.top').offsetHeight + gap;
+  const boardW = 1.5 * COLS + 0.5, boardH = (ROWS + 0.5) * S3; // in units of the hex radius
+  const rail = mobile ? Math.max(62, Math.min(96, Math.floor(vw * 0.17))) : 0;
+  document.querySelectorAll('.side').forEach(e => { e.style.width = mobile ? rail + 'px' : ''; });
+  const byW = (mobile ? vw - 32 - rail * 2 - 16 : vw - 32 - 190 - 250 - 44) / boardW;
+  const byH = (vh - padY - topH - touchH - 6) / boardH;
+  cs = Math.max(8, Math.min(24, Math.floor(Math.min(byW, byH) * 2) / 2));
+  sizeCanvas(boardCv, cs * boardW, cs * boardH);
+  mini = mobile ? Math.max(5, Math.floor((rail - 18) / 7.5)) : 9;
+  sizeCanvas(holdCv, mini * 7.5, mini * 6.5);
+  sizeCanvas(nextCv, mini * 7.5, mini * 13);
+  if (mobile && touchH) {
+    const spare = vh - padY - topH - touchH - cs * boardH - 12;
+    const f = touch.querySelector('.t-grid').offsetWidth || 150, dh = Math.max(0, Math.min(spare, f * 0.25));
+    touch.style.setProperty('--dh', dh + 'px'); touch.style.setProperty('--dp', Math.max(0, Math.min(spare - dh, 28)) + 'px');
+  }
+}
+
+/* ---------- HUD + sheets ---------- */
+function hud() { $('#score').textContent = S.score; $('#lines').textContent = S.lines; $('#level').textContent = S.level; }
+const BEST_KEY = 'hbp-hc-best';
+const best = () => parseInt(store.get(BEST_KEY) || '0', 10) || 0;
+function showSheet(html) { $('#sheet').innerHTML = html; $('#overlay').hidden = false; }
+function titleSheet() {
+  showSheet(`<h2>${t('title')}</h2><p>${t('intro')}</p><ul><li>${t('r1')}</li><li>${t('r2')}</li><li>${t('r3')}</li></ul>
+    <p style="font-size:12px">${t('protoNote')}</p>
+    <div class="actions"><button class="primary" data-act="start" type="button">${t('play')}</button><a class="secondary" href="./">${t('classic')}</a></div>
+    ${best() ? `<p style="margin:14px 0 0;font-size:12px">${t('best')}: <b style="color:var(--honey);font-family:var(--f-mono)">${best()}</b></p>` : ''}`);
+}
+function start() {
+  S = newState(); S.state = 'play'; $('#overlay').hidden = true; spawnNext(); hud(); track('hc-start', 'Honeycomb started');
+}
+function gameOver() {
+  S.state = 'over'; S.cur = null;
+  const pb = S.score > best(); if (pb) store.set(BEST_KEY, String(S.score));
+  track('hc-over', `Honeycomb over: ${S.lines} lines, score ${S.score}`);
+  showSheet(`<h2>${t('over')}</h2><dl class="result"><div><dt>${t('score')}</dt><dd>${S.score}</dd></div><div><dt>${t('lines')}</dt><dd>${S.lines}</dd></div><div><dt>${t('best')}</dt><dd>${Math.max(S.score, best())}</dd></div></dl>
+    <div class="actions"><button class="primary" data-act="start" type="button">${t('again')}</button><a class="secondary" href="./">${t('classic')}</a></div>`);
+}
+function togglePause() {
+  if (S.state === 'play') { S.state = 'pause'; showSheet(`<h2>${t('paused')}</h2><div class="actions"><button class="primary" data-act="resume" type="button">${t('resume')}</button><a class="secondary" href="./">${t('classic')}</a></div>`); }
+  else if (S.state === 'pause') { S.state = 'play'; $('#overlay').hidden = true; last = performance.now(); }
+}
+$('#sheet').addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  if (b.dataset.act === 'start') start(); else if (b.dataset.act === 'resume') togglePause();
+});
+
+/* ---------- input ---------- */
+function act(a) {
+  if (a === 'pause') { if (S && (S.state === 'play' || S.state === 'pause')) togglePause(); return; }
+  if (!S || S.state !== 'play' || !S.cur) return;
+  switch (a) {
+    case 'left': case 'right': held.dir = a === 'left' ? -1 : 1; held.t = 0; tryMove(held.dir, 0); break;
+    case 'down': held.down = true; break;
+    case 'rotate': rotate(1); break;
+    case 'rotateL': rotate(-1); break;
+    case 'drop': hardDrop(); break;
+    case 'hold': doHold(); break;
+  }
+  hud();
+}
+function release(a) {
+  if ((a === 'left' && held.dir === -1) || (a === 'right' && held.dir === 1)) held.dir = 0;
+  if (a === 'down') held.down = false;
+}
+const KEYS = { ArrowLeft: 'left', ArrowRight: 'right', ArrowDown: 'down', ArrowUp: 'rotate', KeyX: 'rotate', KeyZ: 'rotateL', Space: 'drop', KeyC: 'hold', ShiftLeft: 'hold', KeyP: 'pause', Escape: 'pause' };
+addEventListener('keydown', e => {
+  if ((!S || S.state !== 'play') && (e.code === 'Enter' || e.code === 'Space') && !$('#overlay').hidden) {
+    e.preventDefault(); if (S && S.state === 'pause') togglePause(); else start(); return;
+  }
+  const a = KEYS[e.code]; if (!a) return;
+  e.preventDefault(); if (e.repeat) return; act(a);
+});
+addEventListener('keyup', e => { const a = KEYS[e.code]; if (a) release(a); });
+document.querySelectorAll('#touch button').forEach(btn => {
+  const a = btn.dataset.act;
+  btn.addEventListener('pointerdown', e => { e.preventDefault(); btn.classList.add('is-down'); try { btn.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ } act(a); });
+  const up = () => { btn.classList.remove('is-down'); release(a); };
+  btn.addEventListener('pointerup', up); btn.addEventListener('pointercancel', up); btn.addEventListener('lostpointercapture', up);
+  btn.addEventListener('contextmenu', e => e.preventDefault());
+});
+boardCv.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') act('rotate'); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && S && S.state === 'play') togglePause(); });
+addEventListener('resize', layout);
+if (window.visualViewport) visualViewport.addEventListener('resize', layout);
+
+/* ---------- analytics (same GoatCounter site as the classic game, public host only) ---------- */
+const analyticsOn = location.hostname === 'd-bot-2026.github.io';
+if (analyticsOn) { const sc = document.createElement('script'); sc.async = true; sc.src = 'https://gc.zgo.at/count.js'; sc.dataset.goatcounter = 'https://hive-block-producer.goatcounter.com/count'; document.head.append(sc); }
+function track(path, title) { if (!analyticsOn) return; try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path, title, event: true }); } catch (e) { /* never break the game */ } }
+
+// test hooks, local files only
+if (location.protocol === 'file:' || location.hostname === 'localhost') {
+  window.__hc = { state: () => S, start, spawn: type => spawn(type), fill: (r, gap = -1) => { for (let c = 0; c < COLS; c++) S.board[r][c] = c === gap ? null : '#888'; }, PIECES, cellsOf, COLS, ROWS };
+}
+
+S = newState();
+layout(); titleSheet();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

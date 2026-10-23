@@ -14,6 +14,10 @@ Feedback and bug reports: [Issues](https://github.com/d-bot-2026/hive-block-prod
 
 The current version and release notes live in `version.js` (shown in the game footer). After adding a release there, run `node scripts/changelog.js` to regenerate [CHANGELOG.md](CHANGELOG.md).
 
+## Honeycomb mode (prototype)
+
+`honeycomb.html` tries the same game on a hexagon board: flat-top hexagons in straight columns, so pieces still fall straight down, while a full zigzag row clears. It has the seven 4-cell hexagon pieces and 60° turns but none of the tokens or specials yet, and stays out of search results until it becomes a real mode. Try it at https://d-bot-2026.github.io/hive-block-producer/honeycomb.html.
+
 ## Versus play and Hive login (in progress)
 
 `net/` holds the browser modules and `server/` a small reference server. They are built and tested but not switched on yet. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how they fit and the planned order.
